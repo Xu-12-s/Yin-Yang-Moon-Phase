@@ -1,0 +1,20 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# WorkBuddy workspace metadata (machine-local, not part of the site)
+.workbuddy/
+
+# One-off build/patch scripts (not part of the final product)
+fix_all.py
+fix_stars.py
+fix_v3.py
+fix_v4.py
+fix_v5.py
+fix_v6.py
+patch_v2.py
+revert_v4.py

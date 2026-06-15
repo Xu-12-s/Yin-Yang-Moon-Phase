@@ -1,0 +1,1569 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>音境·灵眸·月相八阶自然共感</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000;overflow:hidden;font-family:'宋体','SimSun',serif;user-select:none;cursor:none}
+#canvas{display:block;position:absolute;top:0;left:0}
+#ui{position:absolute;top:0;left:0;width:100%;height:100%;z-index:10}
+#title{position:absolute;top:16px;left:50%;transform:translateX(-50%);color:rgba(255,240,180,0.88);font-size:19px;letter-spacing:5px;pointer-events:none;text-align:center;white-space:nowrap}
+#subtitle{position:absolute;top:46px;left:50%;transform:translateX(-50%);color:rgba(180,200,255,0.55);font-size:11px;letter-spacing:7px;pointer-events:none;white-space:nowrap}
+#freq-display{position:absolute;top:16px;right:24px;color:rgba(180,220,255,0.75);font-size:12px;letter-spacing:2px;pointer-events:none}
+#balance-meter{position:absolute;bottom:88px;right:18px;width:96px;height:96px;pointer-events:none}
+#moon-panel{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;gap:2px;pointer-events:all;padding:2px 6px;border-radius:8px;flex-wrap:nowrap}
+.moon-btn{width:47px;height:47px;border:1.2px solid rgba(200,180,120,0.30);background:rgba(0,0,0,0.62);color:rgba(255,240,180,0.78);font-family:'宋体','SimSun',serif;font-size:10px;cursor:pointer;border-radius:50%;transition:all 0.3s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;backdrop-filter:blur(6px);position:relative}
+.moon-btn .moon-glyph{font-size:18px;line-height:1;transition:all 0.3s}
+.moon-btn .moon-name{font-size:8px;opacity:0.55;letter-spacing:1px;line-height:1}
+.moon-btn:hover{background:rgba(255,220,100,0.10);border-color:rgba(255,220,100,0.60);transform:translateY(-3px) scale(1.08)}
+.moon-btn.active{border-color:rgba(255,220,100,0.92);box-shadow:0 0 20px rgba(255,200,80,0.55);color:#fff;transform:translateY(-4px) scale(1.12)}
+.moon-btn.yin-btn{color:rgba(150,210,255,0.78)}
+.moon-btn.yin-btn.active{border-color:rgba(100,160,255,0.92);box-shadow:0 0 20px rgba(70,140,255,0.55)}
+.moon-btn .moon-dir{font-size:7px;opacity:0.35;letter-spacing:0;position:absolute;top:2px}
+#suggestion-overlay{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;display:flex;align-items:flex-start;justify-content:flex-end;z-index:100;opacity:0;transition:opacity 0.5s;padding:70px 18px 0 0}
+#suggestion-card{background:rgba(8,12,32,0.93);border:1px solid rgba(200,180,120,0.42);border-radius:12px;padding:16px 20px;max-width:260px;width:260px;text-align:center;backdrop-filter:blur(14px);pointer-events:all;box-shadow:0 0 30px rgba(180,140,60,0.18)}
+#suggestion-card .phase-icon{font-size:36px;margin-bottom:2px}
+#suggestion-card .phase-name{font-size:18px;color:rgba(255,240,180,0.92);letter-spacing:3px;margin-bottom:2px}
+#suggestion-card .phase-trigram{font-size:12px;color:rgba(200,180,100,0.50);letter-spacing:3px;margin-bottom:10px}
+#suggestion-card .phase-advice{font-size:12px;color:rgba(200,215,240,0.78);line-height:1.75;letter-spacing:1px;margin-bottom:10px}
+#suggestion-card .phase-freq{font-size:10px;color:rgba(160,190,220,0.48);letter-spacing:0px;margin-bottom:8px}
+#suggestion-card .phase-close{font-size:12px;color:rgba(180,160,120,0.58);cursor:pointer;border:1px solid rgba(180,160,120,0.28);border-radius:4px;padding:4px 18px;background:rgba(0,0,0,0.4);letter-spacing:3px;transition:all 0.25s}
+#suggestion-card .phase-close:hover{color:#fff;border-color:rgba(255,220,100,0.65);background:rgba(255,200,50,0.1)}
+#hand-badge{position:absolute;top:90px;left:50%;transform:translateX(-50%);color:rgba(100,200,255,0.5);font-size:10px;letter-spacing:2px;pointer-events:none;text-align:center;display:none;padding:3px 12px;border-radius:10px;border:1px solid rgba(100,200,255,0.18);background:rgba(0,0,0,0.28)}
+#ctrl-panel{position:absolute;top:16px;left:18px;display:flex;gap:8px;pointer-events:all}
+.ctrl-btn{padding:5px 13px;border:1px solid rgba(200,180,120,0.32);background:rgba(0,0,0,0.52);color:rgba(255,240,180,0.75);font-family:'宋体','SimSun',serif;font-size:12px;cursor:pointer;border-radius:3px;transition:all 0.25s}
+.ctrl-btn:hover{border-color:rgba(255,220,100,0.65);color:#fff}
+.ctrl-btn.on{background:rgba(255,180,50,0.16);border-color:rgba(255,200,80,0.75);color:#fff;box-shadow:0 0 10px rgba(255,180,50,0.32)}
+#status-msg{position:absolute;top:78px;left:50%;transform:translateX(-50%);color:rgba(255,240,180,0.68);font-size:12px;letter-spacing:3px;pointer-events:none;text-align:center;transition:opacity 0.8s;text-shadow:0 0 10px rgba(255,200,80,0.38);white-space:nowrap}
+#balance-label{position:absolute;bottom:188px;right:18px;color:rgba(200,200,200,0.42);font-size:10px;text-align:center;width:96px;pointer-events:none;letter-spacing:1px}
+#balance-time{position:absolute;bottom:172px;right:18px;color:rgba(180,220,255,0.48);font-size:10px;text-align:center;width:96px;pointer-events:none}
+#cam-preview{position:absolute;bottom:148px;right:18px;width:210px;height:158px;border:1px solid rgba(150,180,255,0.22);border-radius:3px;overflow:hidden;display:none}
+#cam-video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+#event-flash{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;opacity:0;transition:opacity 0.15s}
+#guide{position:absolute;bottom:66px;right:18px;color:rgba(180,160,120,0.35);font-size:9px;text-align:right;pointer-events:none;line-height:1.8;letter-spacing:1px}
+#palm-indicator{position:absolute;top:16px;left:50%;transform:translateX(-50%);margin-top:68px;color:rgba(100,200,255,0.55);font-size:10px;letter-spacing:2px;pointer-events:none;text-align:center;display:none}
+#cursor-custom{position:fixed;width:18px;height:18px;border:1px solid rgba(255,220,100,0.65);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width 0.2s,height 0.2s}
+/* ═══ 月相选择首页 v2 ═══ */
+#home-page{position:fixed;top:0;left:0;width:100%;height:100%;z-index:5000;display:flex;flex-direction:row;align-items:center;justify-content:center;transition:opacity 0.8s ease,visibility 0.8s;overflow:hidden}
+#home-page.hidden{opacity:0;visibility:hidden;pointer-events:none}
+/* 首页背景层 */
+#home-bg-canvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:0}
+#home-bg-overlay{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;pointer-events:none;background:radial-gradient(ellipse at 50% 38%, rgba(35,18,58,1) 0%, rgba(12,8,30,0.95) 40%, rgba(4,3,15,0.98) 75%, rgba(0,0,0,1) 100%)}
+#home-vignette{position:absolute;top:0;left:0;width:100%;height:100%;z-index:2;pointer-events:none;background:radial-gradient(ellipse at 50% 50%, transparent 0%, transparent 60%, rgba(0,0,0,0.55) 100%)}
+#home-content{position:relative;z-index:3;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:28px;padding:0 24px}
+/* 左右竖排文字 */
+.home-side-text{writing-mode:vertical-rl;text-orientation:upright;font-size:13px;color:rgba(170,195,230,0.65);letter-spacing:4px;line-height:2;font-family:'宋体','SimSun',serif;text-align:center;max-height:420px;display:flex;align-items:center;justify-content:center;padding:16px 10px;border-left:1px solid rgba(170,195,230,0.12);border-right:1px solid rgba(170,195,230,0.12);border-radius:4px;background:rgba(6,10,28,0.35);backdrop-filter:blur(6px)}
+.home-side-text.right{border-left:1px solid rgba(170,195,230,0.12);border-right:none}
+.home-side-text.left{border-right:1px solid rgba(170,195,230,0.12);border-left:none}
+#home-title-area{text-align:center;margin-bottom:8px}
+#home-title{color:rgba(255,240,180,0.9);font-size:26px;letter-spacing:8px;text-shadow:0 0 30px rgba(200,160,60,0.35)}
+#home-subtitle{color:rgba(150,180,220,0.5);font-size:12px;letter-spacing:6px;margin-top:6px}
+#moon-cards-wrapper{display:flex;flex-direction:column;align-items:center;gap:20px}
+#moon-cards-container{display:flex;gap:10px;align-items:stretch;justify-content:center;flex-wrap:nowrap;padding:0 4px;margin-top:20%}
+/* 统一卡片尺寸 */
+.moon-card{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:3px;cursor:pointer;padding:10px 6px;border:1px solid rgba(200,180,120,0.2);border-radius:12px;background:rgba(6,10,28,0.72);backdrop-filter:blur(12px);transition:transform 0.35s ease,border-color 0.35s,background 0.35s,filter 0.35s;width:auto;min-width:64px;opacity:0;transform:translateY(40px) scale(0.7)}
+.moon-card.show{animation:cardEntrance 0.9s cubic-bezier(.34,1.56,.64,1) forwards}
+.moon-card.visible{opacity:1 !important;transform:translateY(0) scale(1) !important;will-change:auto}
+.moon-card:hover{border-color:rgba(180,200,240,0.35);background:rgba(20,28,48,0.65);transform:scale(1.05) !important;box-shadow:none;filter:brightness(1.3)}
+.moon-card:active{transform:translateY(-2px) scale(1.02)!important}
+.moon-card-icon{font-size:30px;line-height:1;transition:filter 0.3s;filter:drop-shadow(0 0 8px rgba(200,180,120,0.3));width:100%;text-align:center}
+
+.moon-card-name{font-size:12px;color:rgba(255,240,180,0.85);letter-spacing:2px;font-family:'宋体','SimSun',serif;margin-top:1px;white-space:nowrap}
+.moon-card-text-vertical{writing-mode:vertical-rl;text-orientation:upright;font-size:12px;color:rgba(140,175,220,0.70);font-family:'宋体','SimSun',serif;letter-spacing:0.2em;line-height:1.6;text-align:center;white-space:nowrap}
+/* 入场动画 */
+@keyframes cardEntrance{0%{opacity:0;transform:translateY(40px) scale(0.7)}50%{opacity:1;transform:translateY(-8px) scale(1.06)}70%{transform:translateY(3px) scale(0.97)}85%{transform:translateY(-2px) scale(1.01)}100%{opacity:1;transform:translateY(0) scale(1)}}
+#home-hint{color:rgba(140,160,190,0.35);font-size:11px;letter-spacing:3px;margin-top:16px}
+#moon-cards-container:has(.moon-card:hover) .moon-card:not(:hover){transform:scale(1)!important;}
+
+</style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<div id="cursor-custom"></div>
+<div id="ui">
+  <div id="title">观日月潮汐之变，悟月相八阶之学</div>
+  <div id="subtitle">一阴一阳之谓道 · 负阴抱阳 · 冲气以为和</div>
+  <div id="freq-display">♪ 285 Hz</div>
+  <div id="ctrl-panel">
+    <button class="ctrl-btn" id="btn-sound">音境</button>
+    <button class="ctrl-btn" id="btn-cam">灵眸</button>
+    <button class="ctrl-btn" id="btn-home" style="display:none;">归初</button>
+  </div>
+  <div id="status-msg">以意领气 · 月相轮转 · 掌心即乾坤</div>
+  <div id="palm-indicator">手掌已感应</div>
+  <div id="balance-label">阴阳平衡</div>
+  <canvas id="balance-meter" width="96" height="96"></canvas>
+  <div id="balance-time"></div>
+  <div id="moon-panel">
+    <button class="moon-btn yin-btn" data-phase="0"><span class="moon-dir">北</span><span class="moon-glyph">🌑</span><span class="moon-name">朔</span></button>
+    <button class="moon-btn yin-btn" data-phase="1"><span class="moon-dir">东北</span><span class="moon-glyph">🌒</span><span class="moon-name">蛾眉</span></button>
+    <button class="moon-btn" data-phase="2"><span class="moon-dir">东</span><span class="moon-glyph">🌓</span><span class="moon-name">上弦</span></button>
+    <button class="moon-btn" data-phase="3"><span class="moon-dir">东南</span><span class="moon-glyph">🌔</span><span class="moon-name">盈凸</span></button>
+    <button class="moon-btn" data-phase="4"><span class="moon-dir">南</span><span class="moon-glyph">🌕</span><span class="moon-name">望</span></button>
+    <button class="moon-btn yin-btn" data-phase="5"><span class="moon-dir">西南</span><span class="moon-glyph">🌖</span><span class="moon-name">亏凸</span></button>
+    <button class="moon-btn yin-btn" data-phase="6"><span class="moon-dir">西</span><span class="moon-glyph">🌗</span><span class="moon-name">下弦</span></button>
+    <button class="moon-btn yin-btn" data-phase="7"><span class="moon-dir">西北</span><span class="moon-glyph">🌘</span><span class="moon-name">残月</span></button>
+  </div>
+  <div id="suggestion-overlay">
+    <div id="suggestion-card">
+      <div class="phase-icon">🌕</div>
+      <div class="phase-name">望</div>
+      <div class="phase-trigram">☲ · 阳中藏阴 · 大潮</div>
+      <div class="phase-advice">宜庆祝、创作，忌熬夜争执</div>
+      <div class="phase-freq">共振频率 528 Hz · 爱的频率</div>
+      <button class="phase-close" id="suggestion-close">关闭</button>
+    </div>
+  </div>
+  <div id="cam-preview"><video id="cam-video" autoplay muted playsinline></video></div>
+  <div id="event-flash"></div>
+  <div id="guide">点击月相锁定当前潮汐<br>捏合手掌查看月相建议<br>双掌合十重置阴阳</div>
+</div>
+
+<!-- ═══ 月相选择首页 v2 ═══ -->
+<div id="home-page">
+  <canvas id="home-bg-canvas"></canvas>
+  <div id="home-bg-overlay"></div>
+  <div id="home-vignette"></div>
+  <div id="home-content">
+    <div class="home-side-text left">月有八阶，阴阳消长。朔则纯阴，一阳来复；望乃阳极，一阴始萌。上弦下弦，阴阳各半；盈凸亏凸，阳进阴退。蛾眉残月，阴中藏阳，阳中隐阴。观月相之变，悟天地之道。</div>
+    <div id="moon-cards-wrapper">
+      <div id="home-title-area">
+        <div id="home-title">月 相 八 阶</div>
+        <div id="home-subtitle">一阴一阳之谓道 · 负阴抱阳 · 冲气以为和</div>
+      </div>
+      <div id="moon-cards-container">
+        <div class="moon-card" data-phase="0"><span class="moon-card-icon">🌑</span><span class="moon-card-name">朔月</span><span class="moon-card-text-vertical">阴 极 · 纯 阴 无 阳</span></div>
+        <div class="moon-card" data-phase="1"><span class="moon-card-icon">🌒</span><span class="moon-card-name">蛾眉月</span><span class="moon-card-text-vertical">微 阳 · 阴 中 藏 阳</span></div>
+        <div class="moon-card" data-phase="2"><span class="moon-card-icon">🌓</span><span class="moon-card-name">上弦月</span><span class="moon-card-text-vertical">阴 阳 平 · 相 持</span></div>
+        <div class="moon-card" data-phase="3"><span class="moon-card-icon">🌔</span><span class="moon-card-name">盈凸月</span><span class="moon-card-text-vertical">阳 盛 · 阴 退</span></div>
+        <div class="moon-card" data-phase="4"><span class="moon-card-icon">🌕</span><span class="moon-card-name">望月</span><span class="moon-card-text-vertical">阳 极 · 阳 中 藏 阴</span></div>
+        <div class="moon-card" data-phase="5"><span class="moon-card-icon">🌖</span><span class="moon-card-name">亏凸月</span><span class="moon-card-text-vertical">阳 敛 · 阴 进</span></div>
+        <div class="moon-card" data-phase="6"><span class="moon-card-icon">🌗</span><span class="moon-card-name">下弦月</span><span class="moon-card-text-vertical">再 平 衡 · 阴 主</span></div>
+        <div class="moon-card" data-phase="7"><span class="moon-card-icon">🌘</span><span class="moon-card-name">残月</span><span class="moon-card-text-vertical">阴 极 · 阳 隐</span></div>
+      </div>
+      <div id="home-hint">— 点击月相卡片进入 —</div>
+    </div>
+    <div class="home-side-text right">道分阴阳，月呈八相。晦朔玄冥，纯阴无阳；望日光明，阳中藏阴。弦月平权，阴阳相持；凸月偏盛，气机喷薄。晨昏微芒，阴裹其阳，阳抱其阴。察潮汐之动，知造化之理。</div>
+  </div>
+</div>
+
+
+<script>
+"use strict";
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const mC = document.getElementById('balance-meter');
+const mX = mC.getContext('2d');
+const freqEl = document.getElementById('freq-display');
+const statusEl = document.getElementById('status-msg');
+const balTimeEl = document.getElementById('balance-time');
+const flashEl = document.getElementById('event-flash');
+const cursorEl = document.getElementById('cursor-custom');
+const palmEl = document.getElementById('palm-indicator');
+const suggestOverlay = document.getElementById('suggestion-overlay');
+const suggestCard = document.getElementById('suggestion-card');
+
+let CW = window.innerWidth, CH = window.innerHeight;
+canvas.width = CW; canvas.height = CH;
+window.addEventListener('resize', () => { CW = window.innerWidth; CH = window.innerHeight; canvas.width=CW; canvas.height=CH; });
+
+const MOON_PHASES = [
+  { name:'朔', glyph:'🌑', dir:'北', trigram:'☷', yang:5, yin:95, freq:174, freqDesc:'基础放松，纯阴宁静', tide:'小潮', tideType:'neap', advice:'纯阴小潮，血气最弱。宜静养、内观、蓄力。忌远行、开市。', yinDominant:true },
+  { name:'蛾眉', glyph:'🌒', dir:'东北', trigram:'☶', yang:15, yin:85, freq:210, freqDesc:'微阳初升，唤醒', tide:'小潮渐增', tideType:'neapRising', advice:'阴中微阳，潮起之初。宜计划、学习、轻运动。忌冲动。', yinDominant:true },
+  { name:'上弦', glyph:'🌓', dir:'东', trigram:'☳', yang:50, yin:50, freq:285, freqDesc:'活力提升，行动', tide:'中潮', tideType:'mid', advice:'阴阳平衡，中潮。宜进取、表达、出行。忌拖延。', yinDominant:false },
+  { name:'盈凸', glyph:'🌔', dir:'东南', trigram:'☴', yang:65, yin:35, freq:396, freqDesc:'释放恐惧，勇气', tide:'大潮前兆', tideType:'springComing', advice:'阳盛，大潮前兆。宜攻坚、签约，防情绪过亢。', yinDominant:false },
+  { name:'望', glyph:'🌕', dir:'南', trigram:'☲', yang:75, yin:25, freq:528, freqDesc:'爱的频率，转化', tide:'大潮', tideType:'spring', advice:'阳中藏阴，大潮。宜庆祝、创作，忌熬夜争执。', yinDominant:false },
+  { name:'亏凸', glyph:'🌖', dir:'西南', trigram:'☱', yang:65, yin:35, freq:432, freqDesc:'和谐自然，回归', tide:'大潮渐退', tideType:'springFading', advice:'阴长阳消，潮退。宜复盘、断舍离，忌新开始。', yinDominant:true },
+  { name:'下弦', glyph:'🌗', dir:'西', trigram:'☶', yang:50, yin:50, freq:341, freqDesc:'稳定踏实', tide:'中潮', tideType:'midDescending', advice:'阴阳再衡，中潮。宜独处、修复、早睡。忌社交过度。', yinDominant:true },
+  { name:'残月', glyph:'🌘', dir:'西北', trigram:'☰', yang:15, yin:85, freq:128, freqDesc:'深层修复', tide:'小潮', tideType:'neapWaning', advice:'纯阴将尽，小潮。宜清洁、结束旧事、冥想。忌重大决定。', yinDominant:true }
+];
+
+const S = {
+  yang: 50, yin: 50,
+  mx: CW/2, my: CH/2, mvx:0, mvy:0, mspeed:0,
+  time: 0, dt: 0.016,
+  audioOn:false, camOn:false,
+  ac:null, oscs:[], panner:null, mgain:null,
+  balSec:0, harmonyActive:false, harmonyTimer:0,
+  dawnActive:false, dawnProg:0,
+  duskActive:false, duskProg:0,
+  moonPhase:0.5,
+  lockedPhase:-1, lockedPhaseTimer:0,
+  camStream:null,
+  palms: [
+    { detected:false, effective:false, x:0.3, y:0.5, prevX:0.3, prevY:0.5, vx:0, vy:0, speed:0, area:0, areaSmooth:0, attract:0, confirmCnt:0, lostCnt:0, openness:0.5, gestureType:'none', gestureTimer:0, pinchConfirmed:false, pinchFrames:0 },
+    { detected:false, effective:false, x:0.7, y:0.5, prevX:0.7, prevY:0.5, vx:0, vy:0, speed:0, area:0, areaSmooth:0, attract:0, confirmCnt:0, lostCnt:0, openness:0.5, gestureType:'none', gestureTimer:0, pinchConfirmed:false, pinchFrames:0 }
+  ],
+  skinMeanR:160, skinMeanG:110, skinMeanB:90, skinAdaptFrame:0, skinConfidence:0,
+  followMode:false, mouseStillTime:0, prevSkin:0,
+  orbitStrength:0, handLostFrames:0, handAppearFrames:0,
+  handGestureState:'idle', gestureStateTimer:0,
+  bothHandDist:9999, prevBothHandDist:9999,
+  bothHandsEffective:false, fusionActive:false, fusionTimer:0,
+  gesturePulses:[], clickPulses:[], trailParticles:[],
+  mouseGlow:0, prevMouseX:CW/2, prevMouseY:CH/2,
+  braidTargets:[], braidAxisAngle:-Math.PI/2, braidTransition:0, braidMode:false,
+  taijiRotSmooth:0, taijiScaleSmooth:1,
+  taijiHandScale:1, taijiHandRot:0,
+  // ★ 月相行为系统
+  moonBhvIdx:-1, moonBhvPrevIdx:-1, moonBhvBlend:1.0,
+  moonBhvPulseSync:0,
+  tideSplashParticles:[],
+  // ★ 手势增强
+  handTrails:[], handGrabbed:{0:[],1:[]}, handThrowVx:0, handThrowVy:0,
+  handSpiralAngle:0, handRepelPulse:[],
+};
+
+const CFG = {
+  PARTICLE_COUNT:500, INIT_SPREAD_MIN:30, INIT_SPREAD_MAX:80,
+  BASE_SIZE:0.8, SIZE_RANDOM:1.6, SPEED_BASE:0.7, SPEED_RANDOM:0.98,
+  INIT_VEL_RANGE:1.82, PARTICLE_CONVERT_RATE:0.004,
+  CENTER_ATTRACT_BASE:0.001, CENTER_ATTRACT_YANG_BOOST:0,
+  MOUSE_REPEL_BASE:0.08, MOUSE_REPEL_SPEED_MULT:0.015,
+  MOUSE_REPEL_MAX:2.5, MOUSE_REPEL_RADIUS_BASE:350,
+  MOUSE_REPEL_RADIUS_SPEED_MULT:15,
+  MOUSE_STILL_THRESH:0.3, MOUSE_STILL_FRAMES:40,
+  MOUSE_GLOBAL_REPEL:0.35, MOUSE_GLOBAL_ATTRACT:0.04,
+  MOUSE_GLOBAL_FALLOFF_CURVE:3.0, MOUSE_GLOBAL_REF_FRAC:0.55,
+  FOLLOW_ATTRACT_FINGER:0.025, FOLLOW_ATTRACT_HEAD:0.012, FOLLOW_RADIUS:300,
+  HAND_ATTRACT_BASE:0.5, HAND_ATTRACT_RADIUS_BASE:150,
+  HAND_ATTRACT_RADIUS_OPEN_MULT:380, HAND_ATTRACT_RANGE_MULT:2.2,
+  HAND_DRAG_SPEED_MULT:0.55, HAND_DRAG_MAX:12.0,
+  HAND_CLAMP_MULT:2.8, HAND_CLOSE_DAMP:0.88,
+  HAND_CLOSE_THRESH:0.3, HAND_CLOSE_DAMP2_THRESH:0.25,
+  TURBULENCE_BASE:0.21,
+  ORBIT_STANDBY_STRENGTH:0.49, ORBIT_STANDBY_RADIUS:190,
+  ORBIT_STANDBY_CENTRIPETAL:0.025, ORBIT_TRANSITION_SPEED:0.018,
+  ORBIT_RADIUS_MIN_FRAC:0.10, ORBIT_RADIUS_MAX_FRAC:0.25,
+  // ★ 单环细带：外半径150px/内半径135px/带宽15px（占短边比例）
+  ORBIT_RING_CENTER_FRAC:0.178,  // 环中心（约142px@800px屏）
+  ORBIT_RING_WIDTH_FRAC:0.035,   // 环宽度（约28px@800px屏）
+  ORBIT_ANGULAR_SPEED_BASE:0.028, ORBIT_ANGULAR_SPEED_RANGE:0.012,
+  ORBIT_ECCENTRICITY_MAX:0.03, ORBIT_TILT_RANGE:0.08,
+  ORBIT_ATTRACT_STRENGTH:0.025, ORBIT_BOUNDARY_RADIUS_FRAC:0.48,
+  ORBIT_BOUNDARY_FORCE:0.5,
+  HAND_GLOBAL_FOLLOW:0.95, HAND_GLOBAL_FALLOFF:4.0, HAND_GLOBAL_REF_FRAC:0.5,
+  PARTICLE_REPEL_RADIUS:8, PARTICLE_REPEL_STRENGTH:0.008,
+  PALM_TRAJECTORY_INFLUENCE:0.4,
+  VEL_DAMP:0.915, VEL_DAMP_PALM_CLOSE:0.91,
+  YANG_SPEED_BASE:0.98, YANG_SPEED_RANGE:3.64,
+  YIN_SPEED_BASE:0.98, YIN_SPEED_RANGE:3.64,
+  BOUNDARY_MARGIN:15,
+  // ★ 调整后颜色：金色#ffcc66(255,204,102)，蓝色#2266cc(34,102,204)
+  COLOR_YANG_R:255, COLOR_YANG_G:204, COLOR_YANG_G_RANGE:42, COLOR_YANG_B:102,
+  COLOR_YIN_R:34, COLOR_YIN_G:102, COLOR_YIN_G_RANGE:65, COLOR_YIN_B:204,
+  COLOR_BRIGHTNESS_YANG_BASE:0.68, COLOR_BRIGHTNESS_YANG_RANGE:0.32,
+  COLOR_BRIGHTNESS_YIN_BASE:0.58, COLOR_BRIGHTNESS_YIN_RANGE:0.42,
+  TRAIL_LEN_DEFAULT:6, TRAIL_LEN_PALM_BASE:6, TRAIL_LEN_PALM_OPEN_MULT:10,
+  TRAIL_ALPHA_DEFAULT:0.45, TRAIL_ALPHA_PALM_BASE:0.25,
+  TRAIL_ALPHA_PALM_RANGE:0.25, TRAIL_WIDTH_MULT:0.8,
+  TRAIL_FADE_OPEN_MULT:0.6, GLOW_SIZE_MULT:1.6, GLOW_ALPHA_MULT:0.08,
+  CAM_FPS:15, CAM_W:240, CAM_H:180,
+  SKIN_ADAPTIVE_ENABLED:true, SKIN_ADAPTIVE_LEARN:0.02,
+  SKIN_ADAPTIVE_FRAMES:20, SKIN_CONFIDENCE_MIN:0.6,
+  PALM_AREA_THRESH:0.022, PALM_EFFECTIVE_DIST_THRESH:0.04,
+  PALM_PIXEL_MIN:60, PALM_AREA_MIN:0.02, PALM_AREA_RANGE:0.1,
+  PALM_POS_SMOOTH:0.45, PALM_AREA_SMOOTH:0.3,
+  PALM_ATTRACT_SMOOTH:0.25, PALM_SPEED_UNIT:60,
+  PALM_ATTRACT_DECAY:0.85, PALM_AREA_DECAY:0.9,
+  PALM_ATTRACT_MIN:0.05, PALM_OPEN_THRESH:0.6,
+  PALM_CLOSE_THRESH:0.25, PALM_AREA_DIFF_THRESH:0.004,
+  PALM_AREA_YANG:0.8, PALM_AREA_YIN:0.8,
+  PALM_CONFIRM_FRAMES:5, PALM_LOST_FRAMES:5,
+  PALM_ASPECT_MIN:0.5, PALM_ASPECT_MAX:2.0,
+  PALM_FIELD_BASE_R:40, PALM_FIELD_OPEN_MULT:200,
+  PALM_FIELD_GLOW_A_BASE:0.08, PALM_FIELD_GLOW_A_RANGE:0.18,
+  PALM_FIELD_CORE_R:22, PALM_FIELD_CORE_R_RANGE:24,
+  PALM_FIELD_PULSE_FREQ:3.5, PALM_FIELD_PULSE_AMP:0.08,
+  NODE_PALM_R:16,
+  PALM_COLOR_CLOSE_ALPHA_BOOST:1.35, PALM_COLOR_CLOSE_ALPHA_RANGE:2.0,
+  PALM_COLOR_CLOSE_SIZE_BOOST:1.0, PALM_COLOR_CLOSE_SIZE_RANGE:1.2,
+  PALM_COLOR_OPEN_ALPHA_REDUCE:0.55,
+  PALM_PINCH_THRESH:0.22, PALM_SPEED_SWIPE:3.0, PALM_SPEED_PUSH:8.0,
+  PALM_BOTH_CLOSER_SPEED:2.0, PALM_BOTH_APART_SPEED:-1.5,
+  PALM_BOTH_TOGETHER_DIST:0.12, PINCH_CONFIRM_FRAMES:15,
+  GESTURE_COOLDOWN:1500, PUSH_RESET_FORCE:15.0, FUSION_DURATION:3000,
+  LOCK_DURATION:30,
+  Y_MAX:98, Y_MIN:2, BALANCE_LO:44, BALANCE_HI:56,
+  HARMONY_TIME:60, HARMONY_DURATION:9000,
+  NATURAL_DRIFT:0.0022, NATURAL_DRIFT_MIN:4, NATURAL_DRIFT_MAX:96,
+  CLICK_PULSE_MAX_R:280, CLICK_PULSE_LIFE:1.8,
+  CLICK_PULSE_FORCE:1.8, CLICK_PULSE_GLOW_A:0.55,
+  MOUSE_GLOW_RADIUS:80, MOUSE_GLOW_BRIGHTNESS:0.35, MOUSE_GLOW_SIZE_BOOST:1.5,
+  TRAIL_PARTICLE_COUNT:60, TRAIL_PARTICLE_SPAWN:3,
+  TRAIL_PARTICLE_SPEED_MIN:0.5, TRAIL_PARTICLE_SIZE:1.6,
+  TRAIL_PARTICLE_LIFE:0.9, TRAIL_PARTICLE_SPAWN_SPEED:8,
+  MOUSE_RIBBON_WIDTH:2.5, MOUSE_RIBBON_GLOW:0.6,
+  BRAID_LENGTH:300, BRAID_AMPLITUDE:48, BRAID_TURNS:5,
+  BRAID_ROTATION_SPEED:1.8, BRAID_ATTRACT_STRENGTH:0.11,
+  BRAID_TRANSITION_SPEED:0.035, BRAID_DAMP:0.93,
+  BRAID_HAND_OVERRIDE_DELAY:6,
+  GESTURE_PULSE_MAX_R:250, GESTURE_PULSE_LIFE:1.5, GESTURE_PULSE_FORCE:2.2,
+  // ★ 手势增强参数
+  HAND_GRAB_RADIUS:180, HAND_GRAB_STRENGTH:0.12, HAND_THROW_MULT:4.5,
+  HAND_REPEL_RADIUS:220, HAND_REPEL_STRENGTH:0.18,
+  HAND_SPIRAL_FORCE:0.08, HAND_SPIRAL_TANGENT:0.12,
+  HAND_TRAIL_RATE:0.6, HAND_TRAIL_LIFE:25, HAND_TRAIL_MAX:120,
+  HAND_REPEL_PULSE_LIFE:0.4, HAND_REPEL_PULSE_FORCE:3.5, HAND_REPEL_PULSE_R:60,
+};
+
+// ═══════════════════════════════════════════════════════════════
+// ★ 增强星星系统（180颗，大小不一，轻微闪烁）
+// ═══════════════════════════════════════════════════════════════
+const STARS = [];
+for(let i=0;i<180;i++){
+  STARS.push({
+    x:Math.random(), y:Math.random(),
+    r:Math.random()*1.5+0.3,
+    tw:Math.random()*Math.PI*2,
+    twSpeed:0.5+Math.random()*2,
+    brightness:0.4+Math.random()*0.6,
+  });
+}
+const MANSIONS = '角亢氐房心尾箕斗牛女虚危室壁奎娄胃昴毕觜参井鬼柳星张翼轸'.split('');
+
+// ═══════════════════════════════════════════════════════════════
+// ★ 气场粒子环数据
+// ═══════════════════════════════════════════════════════════════
+const palmParticles = [[],[]];
+const PALM_PARTICLE_COUNT = 15;
+for(let h=0;h<2;h++){
+  for(let i=0;i<PALM_PARTICLE_COUNT;i++){
+    palmParticles[h].push({
+      angle:(i/PALM_PARTICLE_COUNT)*Math.PI*2,
+      dist:0.6+Math.random()*0.5,
+      size:1+Math.random()*2,
+      speed:0.8+Math.random()*1.2,
+      phase:Math.random()*Math.PI*2,
+    });
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Particles Init（粒子大小随机0.5~2px，3%概率星核2~3.5px）
+// ═══════════════════════════════════════════════════════════════
+const NP = CFG.PARTICLE_COUNT;
+const P = [];
+for(let i=0;i<NP;i++){
+  let sz = 1.0 + Math.random()*1.5;  // ★ 粒子1~2.5px
+  const isCore = Math.random() < 0.03;
+  if(isCore) sz = 2.5 + Math.random()*1.0;
+  const isYangType = i<NP/2;
+  // ★ 单环细带：所有粒子在同一细环上，规则等距排列
+  const orbitRadiusFrac = CFG.ORBIT_RING_CENTER_FRAC + (Math.random()-0.5)*CFG.ORBIT_RING_WIDTH_FRAC;
+  const orbitAngle0 = (i/NP)*Math.PI*2 + (Math.random()-0.5)*0.06;
+  const radiusFactor = 1.3 - (orbitRadiusFrac-(CFG.ORBIT_RING_CENTER_FRAC-CFG.ORBIT_RING_WIDTH_FRAC/2))/CFG.ORBIT_RING_WIDTH_FRAC*0.3;
+  const initR = orbitRadiusFrac*Math.min(CW,CH);
+  P.push({
+    x: CW/2 + Math.cos(orbitAngle0)*initR, y: CH/2 + Math.sin(orbitAngle0)*initR,
+    vx:(Math.random()-0.5)*0.3, vy:(Math.random()-0.5)*0.3,
+    sz:sz, type: isYangType?'yang':'yin',
+    trail:[], bs:CFG.SPEED_BASE+Math.random()*CFG.SPEED_RANDOM,
+    phase:Math.random()*Math.PI*2, isCore:isCore,
+    orbitAngle:orbitAngle0,
+    orbitRadiusFrac:orbitRadiusFrac,
+    orbitSpeed:(CFG.ORBIT_ANGULAR_SPEED_BASE+Math.random()*CFG.ORBIT_ANGULAR_SPEED_RANGE)*radiusFactor,
+    orbitEcc:Math.random()*CFG.ORBIT_ECCENTRICITY_MAX,
+    orbitTilt:(Math.random()-0.5)*2*CFG.ORBIT_TILT_RANGE,
+    // ★ 月相行为属性
+    visible:true, bhvTimer:Math.random()*120, bhvState:0,
+    fallProgress:0, flickerPhase:Math.random()*Math.PI*2,
+    radialOffset:0, burstBeamLen:0,
+  });
+}
+for(let i=0;i<NP;i++) S.braidTargets.push({x:CW/2,y:CH/2});
+
+// ═══════════════════════════════════════════════════════════════
+// ★ 月相八阶粒子行为系统
+// ═══════════════════════════════════════════════════════════════
+const MOON_BEHAVIORS = [
+  { name:'沉睡', speedMult:0.06, brightBase:0.12, brightRange:0.05, trailLen:0,  glowMult:0.2,  colorDarken:0.65, allCCW:false, special:'dormant'  },
+  { name:'涟漪', speedMult:0.40, brightBase:0.35, brightRange:0.25, trailLen:3,  glowMult:0.5,  colorDarken:0.30, allCCW:false, special:'breathe'  },
+  { name:'闪烁', speedMult:0.00, brightBase:0.50, brightRange:0.50, trailLen:0,  glowMult:0.7,  colorDarken:0.00, allCCW:false, special:'pulse'    },
+  { name:'喷薄', speedMult:0.80, brightBase:0.70, brightRange:0.15, trailLen:5,  glowMult:0.8,  colorDarken:0.00, allCCW:false, special:'burst'    },
+  { name:'极光', speedMult:2.50, brightBase:0.88, brightRange:0.12, trailLen:25, glowMult:1.2,  colorDarken:0.00, allCCW:true,  special:'aurora'    },
+  { name:'沉坠', speedMult:0.65, brightBase:0.55, brightRange:0.20, trailLen:5,  glowMult:0.6,  colorDarken:0.10, allCCW:false, special:'fall'      },
+  { name:'收束', speedMult:0.50, brightBase:0.50, brightRange:0.20, trailLen:8,  glowMult:0.6,  colorDarken:0.10, allCCW:false, special:'spiral'    },
+  { name:'星烬', speedMult:0.15, brightBase:0.20, brightRange:0.40, trailLen:2,  glowMult:0.3,  colorDarken:0.45, allCCW:false, special:'ember'     },
+];
+
+const FREE_BEHAVIOR = { name:'自在', speedMult:1.0, brightBase:0.55, brightRange:0.15, trailLen:6, glowMult:0.5, colorDarken:0.0, allCCW:false, special:'none' };
+function getBhv(idx){ return idx >= 0 ? MOON_BEHAVIORS[idx] : FREE_BEHAVIOR; }
+
+function getCurrentPhaseIdx(){
+  if(S.lockedPhase>=0) return S.lockedPhase;
+  const np=getNaturalMoonPhase();
+  return MOON_PHASES.indexOf(np);
+}
+
+function lerpBhv(a,b,t){ return a+(b-a)*t; }
+
+function triggerMoonBhvTransition(newIdx){
+  if(newIdx===S.moonBhvIdx && S.moonBhvBlend>=1) return;
+  S.moonBhvPrevIdx=S.moonBhvIdx;
+  S.moonBhvIdx=newIdx;
+  S.moonBhvBlend=0;
+  // ★ 残月：半数粒子隐藏
+  const bhv=getBhv(newIdx);
+  const isEmber=bhv.special==='ember';
+  for(let i=0;i<NP;i++){
+    P[i].visible = isEmber ? (i%2===0) : true;
+    P[i].bhvState=0; P[i].fallProgress=0; P[i].burstBeamLen=0; P[i].radialOffset=0;
+  }
+}
+
+const CLOUDS = [];
+for(let i=0;i<20;i++){
+  CLOUDS.push({x:Math.random()*3000, y:50+Math.random()*CH*0.45, w:60+Math.random()*110, h:14+Math.random()*28, spd:0.15+Math.random()*0.25, phase:Math.random()*Math.PI*2});
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Audio System
+// ═══════════════════════════════════════════════════════════════
+let audioFreqYang=285, audioFreqYin=285, audioFreqTarget=285, audioFreqSmooth=285;
+let gestureSoundTimer=0;
+
+function initAudio(){
+  if(S.ac) return;
+  const ac = new(window.AudioContext||window.webkitAudioContext)();
+  S.ac=ac;
+  const pan = ac.createStereoPanner();
+  const mg = ac.createGain(); mg.gain.value=0.14;
+  let convolver=null;
+  try{
+    convolver=ac.createConvolver();
+    const bufLen=ac.sampleRate*1.8;
+    const impulse=ac.createBuffer(2,bufLen,ac.sampleRate);
+    for(let c=0;c<2;c++){const ch=impulse.getChannelData(c);for(let i=0;i<bufLen;i++)ch[i]=(Math.random()*2-1)*Math.pow(1-i/bufLen,2.2);}
+    convolver.buffer=impulse;
+    S.convolver=convolver;
+    S.reverbGain=ac.createGain();S.reverbGain.gain.value=0.18;
+    S.dryGain=ac.createGain();S.dryGain.gain.value=0.82;
+  }catch(e){S.convolver=null;}
+  pan.connect(mg);mg.connect(ac.destination);S.panner=pan;S.mgain=mg;
+  const mk=(type,freq,gainV)=>{const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.value=freq;g.gain.value=gainV;o.connect(g);if(S.convolver&&S.reverbGain&&S.dryGain){g.connect(S.dryGain);S.dryGain.connect(pan);g.connect(S.convolver);S.convolver.connect(S.reverbGain);S.reverbGain.connect(pan);}else{g.connect(pan);}o.start();return{o,g};};
+  S.oscs=[mk('sine',285,0.40),mk('triangle',285,0.16),mk('sine',142,0.20),mk('sine',40,0.06)];
+  const lfo=ac.createOscillator();lfo.frequency.value=0.2;
+  const lfoG=ac.createGain();lfoG.gain.value=8;
+  lfo.connect(lfoG);lfoG.connect(S.oscs[2].o.frequency);lfo.start();
+  S.audioLFO=lfo;S.audioLFOGain=lfoG;
+}
+
+function updateAudio(){
+  if(!S.audioOn||!S.ac) return;
+  const yr=S.yang/100;
+  const freqYang=174+yr*(528-174), freqYin=174+(1-yr)*(528-174);
+  audioFreqTarget=freqYang*yr+freqYin*(1-yr);
+  audioFreqSmooth+=(audioFreqTarget-audioFreqSmooth)*0.08;
+  freqEl.textContent='♪ '+Math.round(audioFreqSmooth)+' Hz';
+  const tidePulse=getTidePulseInterval();
+  if(S.audioLFO) S.audioLFO.frequency.setTargetAtTime(1.0/tidePulse,S.ac.currentTime,0.3);
+  const t=S.ac.currentTime;
+  S.oscs[0].o.frequency.setTargetAtTime(audioFreqSmooth,t,0.25);
+  S.oscs[1].o.frequency.setTargetAtTime(audioFreqSmooth,t,0.25);
+  S.oscs[2].o.frequency.setTargetAtTime(audioFreqSmooth/2,t,0.25);
+  const yangG=yr*(S.harmonyActive?0.3:0.4), yinG=(1-yr)*0.28;
+  S.oscs[0].g.gain.setTargetAtTime(yangG,t,0.2);
+  S.oscs[1].g.gain.setTargetAtTime(yangG*0.4,t,0.2);
+  S.oscs[2].g.gain.setTargetAtTime(yinG,t,0.2);
+  S.oscs[3].g.gain.setTargetAtTime(0.0,t,0.3);
+  S.panner.pan.setTargetAtTime((yr*2-1)*0.6,t,0.3);
+  if(S.convolver&&S.reverbGain&&S.dryGain){
+    const palmAny=S.palms.some(p=>p.detected);
+    const maxAtt=palmAny?Math.max(S.palms[0].attract,S.palms[1].attract):0;
+    const att=Math.min(maxAtt,1);
+    S.reverbGain.gain.setTargetAtTime(0.35*(1-att*0.82),t,0.4);
+    S.dryGain.gain.setTargetAtTime(0.65+att*0.35,t,0.4);
+  }
+}
+
+function getTidePulseInterval(){
+  const yr=S.yang/100;
+  if(yr>0.65) return 1.5; if(yr>0.55) return 2.0; if(yr>0.45) return 3.0; return 5.0;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ★ 1. 深蓝紫径向渐变 + 星云 + 增强星星
+// ═══════════════════════════════════════════════════════════════
+function drawBg(){
+  const yr=S.yang/100;
+  const cw=CW,ch=CH;
+  const starAlpha=0.6+yr*0.3;
+  for(const s of STARS){
+    const tw=Math.sin(S.time*s.twSpeed+s.tw)*0.4+0.6;
+    const a=starAlpha*tw*s.brightness;
+    ctx.beginPath();ctx.arc(s.x*cw,s.y*ch,s.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(220,230,255,${a})`;ctx.fill();
+  }
+  ctx.save();ctx.font='11px 宋体';ctx.globalAlpha=0.30;
+  const MR=Math.min(cw,ch)*0.46;
+  for(let i=0;i<28;i++){
+    const a=i/28*Math.PI*2-Math.PI/2;
+    const sx=cw/2+Math.cos(a)*MR,sy=ch/2+Math.sin(a)*MR;
+    ctx.fillStyle='rgba(180,200,255,1)';ctx.fillText(MANSIONS[i],sx-5,sy+4);
+    ctx.beginPath();ctx.arc(sx,sy,1,0,Math.PI*2);ctx.fillStyle='rgba(150,180,255,0.5)';ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawSkyGradient(){
+  const yr=S.yang/100;
+  const cw=CW,ch=CH;
+  if(S.dawnActive){const p=Math.min(S.dawnProg,1);ctx.fillStyle=`rgb(${Math.round(3+p*210)},${Math.round(3+p*90)},${Math.round(28+p*20)})`;ctx.fillRect(0,0,cw,ch);return;}
+  if(S.duskActive){const p=Math.min(S.duskProg,1);ctx.fillStyle=`rgb(${Math.round(100+p*60)},${Math.round(20-p*15)},${Math.round(80+p*60)})`;ctx.fillRect(0,0,cw,ch);return;}
+  // ★ 深蓝紫到暗黑的径向渐变
+  const gr=ctx.createRadialGradient(cw/2,ch*0.38,ch*0.04, cw/2,ch*0.38,ch*0.95);
+  const centerR=Math.round(20+yr*30),centerG=Math.round(8+yr*10),centerB=Math.round(45+(1-yr)*15);
+  gr.addColorStop(0,`rgb(${centerR+15},${centerG+12},${centerB+10})`);
+  gr.addColorStop(0.4,`rgb(${centerR},${centerG},${centerB})`);
+  gr.addColorStop(0.75,`rgb(${Math.round(centerR*0.35)},${Math.round(centerG*0.3)},${Math.round(centerB*0.6)})`);
+  gr.addColorStop(1,`rgb(${Math.round(centerR*0.12)},${Math.round(centerG*0.08)},${Math.round(centerB*0.25)})`);
+  ctx.fillStyle=gr;ctx.fillRect(0,0,cw,ch);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ★ 3. 潮汐
+// ═══════════════════════════════════════════════════════════════
+function drawTide(){
+  const yr=S.yang/100,t=S.time,ch=CH,cw=CW;
+  const tH=0.13+yr*0.14,baseY=ch*(1-tH);
+  ctx.save();
+  for(let w=0;w<3;w++){
+    const wA=0.28-w*0.08,wY=baseY+w*10;
+    ctx.beginPath();ctx.moveTo(0,wY);
+    for(let x=0;x<=cw;x+=6){ctx.lineTo(x,wY+Math.sin(x*0.011+t*0.9+w*0.5)*(7+yr*12)+Math.sin(x*0.019-t*0.55+w)*(4+yr*7));}
+    ctx.lineTo(cw,ch);ctx.lineTo(0,ch);ctx.closePath();
+    const wg=ctx.createLinearGradient(0,wY,0,ch);
+    wg.addColorStop(0,yr>0.5?`rgba(160,210,255,${wA})`:`rgba(60,110,240,${wA})`);wg.addColorStop(1,'rgba(0,10,60,0.06)');
+    ctx.fillStyle=wg;ctx.fill();
+  }
+  ctx.restore();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ★ 潮汐浪花系统（八相各异，不影响其他系统）
+// ═══════════════════════════════════════════════════════════════
+const TIDE_SPLASH_PARAMS = [
+  { name:'微沫', rate:0.3, count:1, speedMin:0.3, speedMax:0.8, sizeMin:1,   sizeMax:2,   gravity:0.015, wind:0,    r:140,g:160,b:200, alpha:0.35, lifeMin:40,  lifeMax:80,  type:'bubble' },
+  { name:'细雾', rate:0.8, count:2, speedMin:0.5, speedMax:1.2, sizeMin:0.8, sizeMax:2,   gravity:0.008, wind:0.3,  r:160,g:180,b:220, alpha:0.4,  lifeMin:50,  lifeMax:100, type:'mist'   },
+  { name:'律浪', rate:1.5, count:3, speedMin:1.0, speedMax:2.0, sizeMin:1.5, sizeMax:3,   gravity:0.03,  wind:0,    r:180,g:210,b:255, alpha:0.5,  lifeMin:30,  lifeMax:60,  type:'rhythm' },
+  { name:'喷涌', rate:2.5, count:4, speedMin:1.5, speedMax:3.5, sizeMin:2,   sizeMax:4,   gravity:0.04,  wind:0.15, r:200,g:225,b:255, alpha:0.6,  lifeMin:25,  lifeMax:50,  type:'spray'  },
+  { name:'惊涛', rate:4.0, count:5, speedMin:2.5, speedMax:5.0, sizeMin:2,   sizeMax:5,   gravity:0.05,  wind:0.1,  r:230,g:245,b:255, alpha:0.7,  lifeMin:20,  lifeMax:45,  type:'storm'  },
+  { name:'坠雨', rate:1.8, count:3, speedMin:0.8, speedMax:2.0, sizeMin:1.5, sizeMax:3.5, gravity:0.07,  wind:-0.1, r:150,g:175,b:215, alpha:0.5,  lifeMin:25,  lifeMax:55,  type:'rain'   },
+  { name:'旋雾', rate:1.2, count:2, speedMin:0.6, speedMax:1.5, sizeMin:1,   sizeMax:2.5, gravity:0.012, wind:0,    r:130,g:165,b:205, alpha:0.4,  lifeMin:50,  lifeMax:100, type:'swirl'  },
+  { name:'余烬', rate:0.4, count:1, speedMin:0.2, speedMax:0.6, sizeMin:0.8, sizeMax:1.8, gravity:0.008, wind:0,    r:100,g:135,b:185, alpha:0.25, lifeMin:60,  lifeMax:120, type:'ember'  },
+];
+const MAX_SPLASH = 350;
+
+function tideGetWaveY(x,w,t,yr,baseY){
+  return baseY+w*10+Math.sin(x*0.011+t*0.9+w*0.5)*(7+yr*12)+Math.sin(x*0.019-t*0.55+w)*(4+yr*7);
+}
+
+function spawnTideSplash(){
+  const pIdx=getCurrentPhaseIdx();
+  if(pIdx<0||pIdx>7) return;
+  const sp=TIDE_SPLASH_PARAMS[pIdx];
+  const yr=S.yang/100,t=S.time,ch=CH,cw=CW;
+  const tH=0.13+yr*0.14,baseY=ch*(1-tH);
+  if(S.tideSplashParticles.length>=MAX_SPLASH) return;
+  if(Math.random()>sp.rate*0.1) return;
+  const cnt=1+Math.floor(Math.random()*sp.count);
+  for(let i=0;i<cnt;i++){
+    const sx=Math.random()*cw;
+    const wIdx=Math.random()<0.7?0:1;
+    const sy=tideGetWaveY(sx,wIdx,t,yr,baseY);
+    const speed=sp.speedMin+Math.random()*(sp.speedMax-sp.speedMin);
+    const angle=-Math.PI/2+(Math.random()-0.5)*1.2+sp.wind;
+    const life=sp.lifeMin+Math.random()*(sp.lifeMax-sp.lifeMin);
+    const size=sp.sizeMin+Math.random()*(sp.sizeMax-sp.sizeMin);
+    S.tideSplashParticles.push({
+      x:sx,y:sy,
+      vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,
+      size:size,life:life,maxLife:life,
+      type:sp.type,gravity:sp.gravity,wind:sp.wind,
+      r:sp.r+Math.round(Math.random()*20-10),
+      g:sp.g+Math.round(Math.random()*20-10),
+      b:sp.b+Math.round(Math.random()*20-10),
+      alpha:sp.alpha,phase:Math.random()*Math.PI*2,
+    });
+  }
+}
+
+function updateTideSplash(){
+  const t=S.time;
+  for(let i=S.tideSplashParticles.length-1;i>=0;i--){
+    const p=S.tideSplashParticles[i];
+    p.life--;
+    if(p.life<=0){S.tideSplashParticles.splice(i,1);continue;}
+    switch(p.type){
+      case 'bubble':
+        p.vy-=0.004;
+        p.vx+=Math.sin(t*2+p.phase)*0.008;
+        break;
+      case 'mist':
+        p.vx+=p.wind*0.004;
+        p.vy-=0.003;
+        p.size*=1.001;
+        break;
+      case 'rhythm':
+        p.vy+=p.gravity;
+        p.vx+=Math.sin(t*3+p.phase)*0.015;
+        break;
+      case 'spray':
+        p.vy+=p.gravity;
+        p.vx+=p.wind*0.008;
+        break;
+      case 'storm':
+        p.vy+=p.gravity;
+        p.vx+=p.wind*0.006;
+        if(p.life===Math.round(p.maxLife*0.35)&&S.tideSplashParticles.length<MAX_SPLASH-2){
+          for(let j=0;j<2;j++){
+            S.tideSplashParticles.push({
+              x:p.x,y:p.y,
+              vx:(Math.random()-0.5)*1.2,vy:-Math.random()*1.5,
+              size:p.size*0.35,life:12+Math.random()*12,maxLife:24,
+              type:'storm',gravity:0.055,wind:0,
+              r:240,g:245,b:255,alpha:0.45,phase:Math.random()*Math.PI*2,
+            });
+          }
+        }
+        break;
+      case 'rain':
+        p.vy+=p.gravity*1.8;
+        p.vx+=p.wind*0.008;
+        break;
+      case 'swirl':
+        p.vx+=Math.cos(t*1.5+p.phase)*0.025;
+        p.vy+=Math.sin(t*1.5+p.phase)*0.018-0.008;
+        break;
+      case 'ember':
+        p.vy-=0.002;
+        p.vx+=Math.sin(t*0.5+p.phase)*0.004;
+        if(Math.random()>0.6) p.alpha=0.1+Math.random()*0.2;
+        break;
+    }
+    p.x+=p.vx;p.y+=p.vy;
+  }
+}
+
+function drawTideSplash(){
+  if(!S.tideSplashParticles.length) return;
+  ctx.save();
+  for(const p of S.tideSplashParticles){
+    const lr=p.life/p.maxLife;
+    const fade=lr<0.3?lr/0.3:(lr>0.8?(1-lr)/0.2:1);
+    const a=Math.min(1,p.alpha*fade);
+    if(a<0.01) continue;
+    switch(p.type){
+      case 'bubble':{
+        ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+        ctx.fillStyle=`rgba(${p.r},${p.g},${p.b},${a*0.35})`;
+        ctx.fill();
+        ctx.strokeStyle=`rgba(${Math.min(255,p.r+40)},${Math.min(255,p.g+30)},${Math.min(255,p.b+20)},${a*0.55})`;
+        ctx.lineWidth=0.5;ctx.stroke();
+        break;
+      }
+      case 'mist':{
+        const mg=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.size*2.5);
+        mg.addColorStop(0,`rgba(${p.r},${p.g},${p.b},${a*0.45})`);
+        mg.addColorStop(0.6,`rgba(${p.r},${p.g},${p.b},${a*0.15})`);
+        mg.addColorStop(1,'rgba(0,0,0,0)');
+        ctx.fillStyle=mg;ctx.beginPath();ctx.arc(p.x,p.y,p.size*2.5,0,Math.PI*2);ctx.fill();
+        break;
+      }
+      case 'rhythm':{
+        ctx.beginPath();ctx.moveTo(p.x,p.y);
+        ctx.lineTo(p.x-p.vx*3,p.y-p.vy*3);
+        ctx.strokeStyle=`rgba(${p.r},${p.g},${p.b},${a*0.3})`;
+        ctx.lineWidth=p.size*0.7;ctx.stroke();
+        ctx.beginPath();ctx.arc(p.x,p.y,p.size*0.7,0,Math.PI*2);
+        ctx.fillStyle=`rgba(${p.r},${p.g},${p.b},${a})`;
+        ctx.fill();
+        break;
+      }
+      case 'spray':{
+        const sl=Math.sqrt(p.vx*p.vx+p.vy*p.vy)*2+2;
+        const sa=Math.atan2(p.vy,p.vx);
+        ctx.save();ctx.translate(p.x,p.y);ctx.rotate(sa);
+        ctx.beginPath();ctx.ellipse(0,0,sl,p.size*0.4,0,0,Math.PI*2);
+        ctx.fillStyle=`rgba(${p.r},${p.g},${p.b},${a*0.65})`;
+        ctx.fill();ctx.restore();
+        break;
+      }
+      case 'storm':{
+        const sg=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.size*1.8);
+        sg.addColorStop(0,`rgba(255,255,255,${a*0.75})`);
+        sg.addColorStop(0.35,`rgba(${p.r},${p.g},${p.b},${a*0.5})`);
+        sg.addColorStop(1,'rgba(0,0,0,0)');
+        ctx.fillStyle=sg;ctx.beginPath();ctx.arc(p.x,p.y,p.size*1.8,0,Math.PI*2);ctx.fill();
+        ctx.beginPath();ctx.moveTo(p.x,p.y);
+        ctx.lineTo(p.x-p.vx*1.5,p.y-p.vy*1.5);
+        ctx.strokeStyle=`rgba(255,255,255,${a*0.35})`;ctx.lineWidth=0.8;ctx.stroke();
+        break;
+      }
+      case 'rain':{
+        ctx.beginPath();ctx.moveTo(p.x,p.y);
+        ctx.lineTo(p.x-p.vx*0.5,p.y-p.vy*2.5);
+        ctx.strokeStyle=`rgba(${p.r},${p.g},${p.b},${a*0.65})`;
+        ctx.lineWidth=p.size*0.35;ctx.stroke();
+        ctx.beginPath();ctx.arc(p.x,p.y,p.size*0.25,0,Math.PI*2);
+        ctx.fillStyle=`rgba(${Math.min(255,p.r+30)},${Math.min(255,p.g+25)},${Math.min(255,p.b+15)},${a})`;
+        ctx.fill();
+        break;
+      }
+      case 'swirl':{
+        ctx.save();ctx.translate(p.x,p.y);
+        ctx.rotate(S.time*2+p.phase);
+        ctx.beginPath();ctx.arc(0,0,p.size*1.3,0,Math.PI*1.1);
+        ctx.strokeStyle=`rgba(${p.r},${p.g},${p.b},${a*0.55})`;
+        ctx.lineWidth=p.size*0.35;ctx.stroke();
+        ctx.restore();
+        break;
+      }
+      case 'ember':{
+        ctx.beginPath();ctx.arc(p.x,p.y,p.size*0.5,0,Math.PI*2);
+        ctx.fillStyle=`rgba(${p.r},${p.g},${p.b},${a*0.45})`;
+        ctx.fill();
+        if(Math.random()>0.65){
+          ctx.beginPath();ctx.arc(p.x,p.y,p.size*0.25,0,Math.PI*2);
+          ctx.fillStyle=`rgba(${Math.min(255,p.r+60)},${Math.min(255,p.g+55)},${Math.min(255,p.b+40)},${a*0.75})`;
+          ctx.fill();
+        }
+        break;
+      }
+    }
+  }
+  ctx.restore();
+}
+
+function drawClouds(){
+  const spd=S.mspeed*0.04+0.2,yr=S.yang/100,t=S.time;
+  ctx.save();
+  for(const c of CLOUDS){c.x+=c.spd*spd;if(c.x>CW+c.w)c.x=-c.w;const cy2=c.y+Math.sin(t*0.25+c.phase)*8;ctx.globalAlpha=0.055;ctx.beginPath();ctx.ellipse(c.x,cy2,c.w,c.h,0,0,Math.PI*2);ctx.fillStyle=yr>0.5?'rgba(255,242,205,1)':'rgba(185,205,255,1)';ctx.fill();}
+  ctx.globalAlpha=0.035;ctx.lineWidth=1.2;ctx.strokeStyle=yr>0.5?'rgba(255,235,180,1)':'rgba(150,190,255,1)';
+  for(let i=0;i<7;i++){const yb=CH*(0.08+i*0.07);ctx.beginPath();ctx.moveTo(0,yb);for(let x=0;x<=CW;x+=16){ctx.lineTo(x,yb+Math.sin(x*0.009+t*spd*0.6+i*1.1)*16);}ctx.stroke();}
+  ctx.restore();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ★ 2. 灵性太极图（深靛蓝+暖米白，0.85透明度，光晕，缓动惯性）
+// ═══════════════════════════════════════════════════════════════
+function drawTaiji(cx,cy,r){
+  const yr=S.yang/100;
+  const pulseSpeed=getTidePulseSpeed();
+  const pulse=(Math.sin(S.time*pulseSpeed)+1)/2;
+  // ★ 双手靠近：实时计算缩放和旋转速度
+  const bothEff=S.palms[0].effective&&S.palms[1].effective;
+  if(bothEff){
+    // 双手间距 0→0.6 映射到 handScale 1.0→2.2
+    const rawDist=S.bothHandDist; // 归一化0~1
+    const targetHandScale=1+Math.max(0,(0.6-rawDist)/0.6)*1.2;
+    S.taijiHandScale+=(targetHandScale-S.taijiHandScale)*0.06;
+    // 双手越近旋转越快（顺时针，正方向）—— 提升旋转
+    const spinSpeed=0.025+Math.max(0,(0.6-rawDist)/0.6)*0.18;
+    S.taijiHandRot+=spinSpeed;
+  } else {
+    // 松手后慢慢恢复原始大小
+    S.taijiHandScale+=(1-S.taijiHandScale)*0.04;
+  }
+  // ★ 缓动惯性
+  const targetScale=1+pulse*0.04;
+  S.taijiScaleSmooth+=(targetScale-S.taijiScaleSmooth)*0.05;
+  const targetRot=S.time*(0.010+yr*0.028);
+  S.taijiRotSmooth+=(targetRot-S.taijiRotSmooth)*0.08;
+  const finalScale=S.taijiScaleSmooth*S.taijiHandScale;
+  const finalRot=S.taijiHandRot+S.taijiRotSmooth;
+  const yB=0.55+yr*0.45, iB=0.45+(1-yr)*0.45;
+  ctx.save();
+  ctx.globalAlpha=0.85;
+  ctx.translate(cx,cy);ctx.rotate(finalRot);ctx.scale(finalScale,finalScale);
+  // ★ 外圈白色光晕（shadowBlur）
+  ctx.shadowColor='rgba(200,210,255,0.4)';ctx.shadowBlur=25;
+  const aura=ctx.createRadialGradient(0,0,r*0.4,0,0,r*2.2);
+  aura.addColorStop(0,`rgba(255,215,90,${0.04+yr*0.08})`);
+  aura.addColorStop(0.5,`rgba(100,145,255,${0.03+(1-yr)*0.07})`);
+  aura.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=aura;ctx.beginPath();ctx.arc(0,0,r*2.2,0,Math.PI*2);ctx.fill();
+  ctx.shadowBlur=15;
+  // ★ 阳鱼：暖米白 #f5f0e0
+  ctx.beginPath();ctx.arc(0,0,r,-Math.PI/2,Math.PI/2,false);ctx.arc(0,r/2,r/2,Math.PI/2,-Math.PI/2,true);ctx.arc(0,-r/2,r/2,Math.PI/2,-Math.PI/2,false);
+  const yg=ctx.createRadialGradient(-r*0.15,-r*0.25,0,0,0,r);
+  yg.addColorStop(0,`rgba(245,240,224,${yB})`);yg.addColorStop(1,`rgba(210,200,170,${yB*0.6})`);
+  ctx.fillStyle=yg;ctx.fill();
+  // ★ 阴鱼：深靛蓝 #1a2a4a
+  ctx.beginPath();ctx.arc(0,0,r,Math.PI/2,-Math.PI/2,false);ctx.arc(0,-r/2,r/2,-Math.PI/2,Math.PI/2,true);ctx.arc(0,r/2,r/2,-Math.PI/2,Math.PI/2,false);
+  const ig=ctx.createRadialGradient(r*0.15,r*0.25,0,0,0,r);
+  ig.addColorStop(0,`rgba(26,42,74,${iB})`);ig.addColorStop(1,`rgba(10,15,40,${iB*0.8})`);
+  ctx.fillStyle=ig;ctx.fill();
+  ctx.shadowBlur=0;
+  ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.strokeStyle=`rgba(200,175,95,${0.28+yr*0.28})`;ctx.lineWidth=1.2;ctx.stroke();
+  // ★ 鱼眼：发光小圆
+  ctx.shadowColor='rgba(60,100,200,0.6)';ctx.shadowBlur=10;
+  ctx.beginPath();ctx.arc(0,-r/2,r*0.11,0,Math.PI*2);
+  const eyeG1=ctx.createRadialGradient(0,-r/2,0,0,-r/2,r*0.11);
+  eyeG1.addColorStop(0,`rgba(100,140,220,${iB*0.9})`);eyeG1.addColorStop(1,`rgba(26,42,74,${iB*0.7})`);
+  ctx.fillStyle=eyeG1;ctx.fill();
+  ctx.shadowColor='rgba(255,230,160,0.6)';ctx.shadowBlur=10;
+  ctx.beginPath();ctx.arc(0,r/2,r*0.11,0,Math.PI*2);
+  const eyeG2=ctx.createRadialGradient(0,r/2,0,0,r/2,r*0.11);
+  eyeG2.addColorStop(0,`rgba(255,245,200,${yB*0.9})`);eyeG2.addColorStop(1,`rgba(245,240,224,${yB*0.7})`);
+  ctx.fillStyle=eyeG2;ctx.fill();
+  ctx.restore();
+}
+
+function getTidePulseSpeed(){return S.moonBhvPulseSync||2.0;}
+
+// ═══════════════════════════════════════════════════════════════
+// ★ 5. 气场粒子环（替代实心圆，lighter混合，速度响应）
+// ═══════════════════════════════════════════════════════════════
+function drawPalmField(){
+  if(!S.camOn) return;
+  const t=S.time;
+  ctx.save();
+  S.palms.forEach((palm,idx)=>{
+    if(!palm.detected) return;
+    const isLeft=idx===0,isEffective=palm.effective;
+    const px=palm.x*CW,py=palm.y*CH;
+    const openness=palm.openness,att=palm.attract;
+    const distMult=isEffective?1.0:0.3,distAlpha=isEffective?1.0:0.25;
+    const speed=palm.speed;
+    const colR=isLeft?255:34,colG=isLeft?204:102,colB=isLeft?102:204;
+    // ★ 光晕大小随手速变化
+    const speedExpand=1+Math.min(speed/8,1.5);
+    const baseR=(CFG.PALM_FIELD_BASE_R+openness*CFG.PALM_FIELD_OPEN_MULT)*distMult*speedExpand;
+    // ★ 多层径向渐变 + lighter混合
+    ctx.globalCompositeOperation='lighter';
+    const grad=ctx.createRadialGradient(px,py,baseR*0.05,px,py,baseR*2.5);
+    const iAlpha=(CFG.PALM_FIELD_GLOW_A_BASE+att*CFG.PALM_FIELD_GLOW_A_RANGE)*distAlpha;
+    grad.addColorStop(0,`rgba(${colR},${colG},${colB},${iAlpha*2.0})`);
+    grad.addColorStop(0.2,`rgba(${Math.round(colR*0.9)},${Math.round(colG*0.85)},${Math.round(colB*0.85)},${iAlpha*1.0})`);
+    grad.addColorStop(0.5,`rgba(${Math.round(colR*0.6)},${Math.round(colG*0.5)},${Math.round(colB*0.5)},${iAlpha*0.3})`);
+    grad.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=grad;ctx.beginPath();ctx.arc(px,py,baseR*2.5,0,Math.PI*2);ctx.fill();
+    ctx.globalCompositeOperation='source-over';
+    // ★ 气场粒子环
+    const particles=palmParticles[idx];
+    for(const pp of particles){
+      pp.angle+=pp.speed*0.02*(1+speed*0.1);
+      const pDist=baseR*pp.dist;
+      const ppx=px+Math.cos(pp.angle+pp.phase)*pDist;
+      const ppy=py+Math.sin(pp.angle+pp.phase)*pDist;
+      const pulseP=(Math.sin(t*3+pp.phase)+1)/2;
+      const pAlpha=(0.4+pulseP*0.4)*distAlpha;
+      const pGrad=ctx.createRadialGradient(ppx,ppy,0,ppx,ppy,pp.size*3);
+      pGrad.addColorStop(0,`rgba(${colR},${colG},${colB},${pAlpha})`);
+      pGrad.addColorStop(0.5,`rgba(${Math.round(colR*0.8)},${Math.round(colG*0.7)},${Math.round(colB*0.7)},${pAlpha*0.4})`);
+      pGrad.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=pGrad;ctx.beginPath();ctx.arc(ppx,ppy,pp.size*3,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.arc(ppx,ppy,pp.size*0.6,0,Math.PI*2);
+      ctx.fillStyle=`rgba(${Math.min(255,colR+40)},${Math.min(255,colG+40)},${Math.min(255,colB+40)},${pAlpha*1.2})`;ctx.fill();
+    }
+    // 掌心节点
+    const palmPulse=(Math.sin(t*CFG.PALM_FIELD_PULSE_FREQ)+1)/2;
+    const palmR=CFG.NODE_PALM_R*(0.85+palmPulse*0.3)*distMult;
+    const pg=ctx.createRadialGradient(px,py,0,px,py,palmR*3.5);
+    const nodeAlpha=0.9*distAlpha;
+    pg.addColorStop(0,`rgba(${colR},${colG},${colB},${nodeAlpha})`);
+    pg.addColorStop(0.3,`rgba(${Math.round(colR*0.8)},${Math.round(colG*0.7)},${Math.round(colB*0.6)},${(0.5+palmPulse*0.3)*distAlpha})`);
+    pg.addColorStop(1,isLeft?'rgba(120,80,30,0)':'rgba(20,40,100,0)');
+    ctx.fillStyle=pg;ctx.beginPath();ctx.arc(px,py,palmR*3.5,0,Math.PI*2);ctx.fill();
+    const nodeCol=isLeft?`rgba(255,230,150,${(0.8+palmPulse*0.2)*distAlpha})`:`rgba(120,180,255,${(0.8+palmPulse*0.2)*distAlpha})`;
+    ctx.fillStyle=nodeCol;ctx.beginPath();ctx.arc(px,py,palmR,0,Math.PI*2);ctx.fill();
+    // ★ 手势增强：捏合漩涡环
+    if(palm.gestureType==='pinch'&&palm.pinchConfirmed){
+      const vortexR=baseR*0.7;
+      for(let ring=0;ring<3;ring++){
+        const rAlpha=(0.3-ring*0.08)*distAlpha;
+        const rr=vortexR*(0.4+ring*0.25);
+        const rAngle=t*3+ring*Math.PI/3;
+        ctx.beginPath();ctx.arc(px,py,rr,rAngle,rAngle+Math.PI*0.8);
+        ctx.strokeStyle=`rgba(${colR},${colG},${colB},${rAlpha})`;
+        ctx.lineWidth=2-ring*0.5;ctx.stroke();
+      }
+    }
+    // ★ 手势增强：张掌排斥波纹
+    if(palm.gestureType==='open'&&openness>CFG.PALM_OPEN_THRESH){
+      const waveN=3;
+      for(let w=0;w<waveN;w++){
+        const waveR=baseR*(0.3+w*0.25)+Math.sin(t*4+w)*5;
+        const wAlpha=(0.2-w*0.05)*distAlpha;
+        ctx.beginPath();ctx.arc(px,py,waveR,0,Math.PI*2);
+        ctx.strokeStyle=`rgba(${colR},${colG},${colB},${wAlpha})`;
+        ctx.lineWidth=1.5;ctx.stroke();
+      }
+    }
+    ctx.globalAlpha=0.5*distAlpha;ctx.font='10px 宋体';ctx.textAlign='center';
+    const gLabels={none:isLeft?'左·金':'右·蓝',open:'气散',pinch:'气聚',push:'归元'};
+    ctx.fillStyle=isEffective?(isLeft?'#ffcc66':'#4488cc'):'#888';
+    ctx.fillText(gLabels[palm.gestureType]||(isLeft?'左·金':'右·蓝'),px,py+baseR+18);
+  });
+  if(S.fusionActive&&S.palms[0].detected&&S.palms[1].detected){
+    const px1=S.palms[0].x*CW,py1=S.palms[0].y*CH,px2=S.palms[1].x*CW,py2=S.palms[1].y*CH;
+    const midX=(px1+px2)/2,midY=(py1+py2)/2,dist=Math.hypot(px2-px1,py2-py1),ringR=dist*0.7+S.fusionTimer*2;
+    ctx.globalAlpha=0.5;ctx.strokeStyle='rgba(200,150,255,0.5)';ctx.lineWidth=2;
+    ctx.beginPath();ctx.arc(midX,midY,ringR,0,Math.PI*2);ctx.stroke();
+    ctx.beginPath();ctx.arc(midX,midY,ringR*0.6,0,Math.PI*2);ctx.strokeStyle='rgba(255,200,255,0.35)';ctx.stroke();
+  }
+  ctx.restore();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Particle Update
+// ═══════════════════════════════════════════════════════════════
+let neighborBlend=new Uint8Array(NP),neighborTimer=0;
+
+  // ★ 单环系统：粒子类型变化时保持同一环，仅方向变化
+
+function updateParticles(){
+  const cx=CW/2,cy=CH/2,yr=S.yang/100;
+  // ★ 月相行为过渡（0.8秒≈48帧）
+  if(S.moonBhvBlend<1) S.moonBhvBlend=Math.min(1,S.moonBhvBlend+1/48);
+  const bhvIdx=S.moonBhvIdx, bhvPrev=S.moonBhvPrevIdx, blend=S.moonBhvBlend;
+  const bhv=getBhv(bhvIdx), bhvP=getBhv(bhvPrev);
+  // ★ 太极联动：脉冲同步
+  S.moonBhvPulseSync = bhv.special==='pulse'? 2.0 : bhv.special==='breathe'? 1.2 : bhv.special==='aurora'? 4.0 : 2.0;
+
+  const tgt=Math.round(NP*yr);
+  let yc=P.filter(p=>p.type==='yang').length;
+  for(const p of P){if(yc<tgt&&p.type==='yin'&&Math.random()<CFG.PARTICLE_CONVERT_RATE){p.type='yang';yc++;}else if(yc>tgt&&p.type==='yang'&&Math.random()<CFG.PARTICLE_CONVERT_RATE){p.type='yin';yc--;}}
+  const handAny=S.camOn&&S.palms.some(p=>p.effective);
+  if(handAny){S.handAppearFrames++;S.handLostFrames=0;}else{S.handLostFrames++;S.handAppearFrames=0;}
+  const handConfirmed=S.handAppearFrames>=CFG.BRAID_HAND_OVERRIDE_DELAY;
+  if(handConfirmed){S.braidMode=false;S.braidTransition=Math.max(0,S.braidTransition-CFG.BRAID_TRANSITION_SPEED);}else if(!handAny){S.braidMode=false;S.braidTransition=Math.max(0,S.braidTransition-CFG.BRAID_TRANSITION_SPEED*2);}
+  if(!handAny){const mouseFactor=Math.max(0.3,1-S.mspeed/15);S.orbitStrength+=(mouseFactor-S.orbitStrength)*(mouseFactor>S.orbitStrength?CFG.ORBIT_TRANSITION_SPEED:CFG.ORBIT_TRANSITION_SPEED*5);}else{S.orbitStrength+=(0.2-S.orbitStrength)*CFG.ORBIT_TRANSITION_SPEED*3;}
+  const palmAny=S.camOn&&S.palms.some(p=>p.effective);
+  const detectedPalms=S.palms.filter(p=>p.effective);
+  const maxOpenness=palmAny?Math.max(...detectedPalms.map(p=>p.openness)):0;
+  const cellS=CFG.PARTICLE_REPEL_RADIUS,gCols=Math.ceil(CW/cellS),gRows=Math.ceil(CH/cellS);
+  const grid=new Array(gCols*gRows);
+  for(let i=0;i<NP;i++){const gx=Math.min(gCols-1,Math.max(0,Math.floor(P[i].x/cellS))),gy=Math.min(gRows-1,Math.max(0,Math.floor(P[i].y/cellS))),ci=gy*gCols+gx;if(!grid[ci])grid[ci]=[];grid[ci].push(i);}
+  const repR2=CFG.PARTICLE_REPEL_RADIUS*CFG.PARTICLE_REPEL_RADIUS;
+  if(S.mspeed<CFG.MOUSE_STILL_THRESH){S.mouseStillTime++;}else{S.mouseStillTime=0;S.followMode=false;}
+  if(S.mouseStillTime>CFG.MOUSE_STILL_FRAMES&&!S.braidMode)S.followMode=true;
+  let followTargets=[];
+  if(S.followMode){if(detectedPalms.length>0){for(const pl of detectedPalms)followTargets.push({x:pl.x*CW,y:pl.y*CH,type:'palm'});}else{followTargets.push({x:CW/2,y:CH/2,type:'center'});}}
+  const minDim=Math.min(CW,CH),boundaryR=minDim*CFG.ORBIT_BOUNDARY_RADIUS_FRAC;
+  for(let pi=0;pi<NP;pi++){
+    const p=P[pi],isY=p.type==='yang';
+    if(!p.visible) continue; // ★ 残月：半数粒子不更新
+    // ★ 月相行为速度倍率
+    let speedMult=lerpBhv(bhvP.speedMult,bhv.speedMult,blend);
+    // 蛾眉月·涟漪：速度波动 0.5→1.0→0.5
+    if(bhv.special==='breathe'&&blend>0.5) speedMult*=0.5+0.5*Math.abs(Math.sin(S.time*1.2+p.flickerPhase*0.3));
+    // 上弦月·闪烁：完全静止
+    if(bhv.special==='pulse'&&blend>0.5) speedMult=0;
+    // 残月·星烬：随机速度跳变
+    if(bhv.special==='ember'&&blend>0.5) speedMult*=0.3+Math.random()*0.7;
+
+    const spmod=isY?(CFG.YANG_SPEED_BASE+yr*CFG.YANG_SPEED_RANGE):(CFG.YIN_SPEED_BASE+(1-yr)*CFG.YIN_SPEED_RANGE);
+    const sp=p.bs*spmod;
+    const dx=cx-p.x,dy=cy-p.y,dist=Math.sqrt(dx*dx+dy*dy)||1;
+    const att=CFG.CENTER_ATTRACT_BASE*(1+yr*CFG.CENTER_ATTRACT_YANG_BOOST)/dist;
+    let rfx=0,rfy=0;
+    const gx2=Math.min(gCols-1,Math.max(0,Math.floor(p.x/cellS))),gy2=Math.min(gRows-1,Math.max(0,Math.floor(p.y/cellS)));
+    for(let dy2=-1;dy2<=1;dy2++){for(let dx2=-1;dx2<=1;dx2++){const nx=gx2+dx2,ny=gy2+dy2;if(nx<0||nx>=gCols||ny<0||ny>=gRows)continue;const cell=grid[ny*gCols+nx];if(!cell)continue;for(const j of cell){if(j<=pi)continue;const pj=P[j],rdx=p.x-pj.x,rdy=p.y-pj.y,rd2=rdx*rdx+rdy*rdy;if(rd2<repR2&&rd2>0.01){const rd=Math.sqrt(rd2),rf=CFG.PARTICLE_REPEL_STRENGTH*(1-rd/CFG.PARTICLE_REPEL_RADIUS)/rd;rfx+=rdx*rf;rfy+=rdy*rf;}}}}
+    const mdx=p.x-S.mx,mdy=p.y-S.my,md=Math.sqrt(mdx*mdx+mdy*mdy)||1;
+    const canvasDiag=Math.sqrt(CW*CW+CH*CH),globalRef=canvasDiag*CFG.MOUSE_GLOBAL_REF_FRAC,braidReduce=1-S.braidTransition;
+    let mfx=0,mfy=0;
+    if(!S.followMode&&braidReduce>0.01){const distNorm=md/globalRef,falloff=1/(1+distNorm*distNorm*CFG.MOUSE_GLOBAL_FALLOFF_CURVE),speedFactor=Math.min(1,S.mspeed/25),mf=CFG.MOUSE_GLOBAL_REPEL*speedFactor*falloff/md*braidReduce;mfx=mdx*mf;mfy=mdy*mf;if(S.mspeed>0.5){const oppStr=Math.min(S.mspeed*0.025,1.0)*falloff*braidReduce;mfx-=S.mvx*oppStr;mfy-=S.mvy*oppStr;}}else if(braidReduce>0.01){const distNorm=md/globalRef,falloff=1/(1+distNorm*distNorm*1.2),mf=CFG.MOUSE_GLOBAL_ATTRACT*falloff/md*braidReduce;mfx=-mdx*mf;mfy=-mdy*mf;}
+    let pfx=0,pfy=0,closestOpenness=0.5,closestDist=9999;
+    if(palmAny){const canvasDiagForce=Math.sqrt(CW*CW+CH*CH),handGlobalRef=canvasDiagForce*CFG.HAND_GLOBAL_REF_FRAC;for(let pi2=0;pi2<detectedPalms.length;pi2++){const pl=detectedPalms[pi2],palmIdx=S.palms.indexOf(pl);if(palmIdx===0&&!isY)continue;if(palmIdx===1&&isY)continue;const pawX=pl.x*CW,pawY=pl.y*CH,pdx=pawX-p.x,pdy=pawY-p.y,pd=Math.sqrt(pdx*pdx+pdy*pdy)||1,plOpenness=pl.openness,plDragMult=Math.min(1+pl.speed*CFG.HAND_DRAG_SPEED_MULT,CFG.HAND_DRAG_MAX),normDist=pd/handGlobalRef,falloff=1/(1+normDist*normDist*CFG.HAND_GLOBAL_FALLOFF),attractMult=plDragMult*(1.0+(1-plOpenness)*CFG.HAND_CLAMP_MULT),pf=CFG.HAND_GLOBAL_FOLLOW*falloff*attractMult/Math.max(pd,10);pfx+=pdx*pf;pfy+=pdy*pf;p.vx+=pl.vx*falloff*CFG.PALM_TRAJECTORY_INFLUENCE;p.vy+=pl.vy*falloff*CFG.PALM_TRAJECTORY_INFLUENCE;if(pd<closestDist){closestDist=pd;closestOpenness=plOpenness;}
+      // ★ 手势增强：捏合螺旋吸引
+      if(pl.gestureType==='pinch'&&pl.pinchConfirmed&&pd<CFG.HAND_GRAB_RADIUS){
+        const spiralAngle=Math.atan2(pdy,pdx)+Math.PI/2;
+        const spiralFalloff=1-pd/CFG.HAND_GRAB_RADIUS;
+        pfx+=pdx/pd*CFG.HAND_SPIRAL_FORCE*spiralFalloff;
+        pfy+=pdy/pd*CFG.HAND_SPIRAL_FORCE*spiralFalloff;
+        p.vx+=Math.cos(spiralAngle)*CFG.HAND_SPIRAL_TANGENT*spiralFalloff;
+        p.vy+=Math.sin(spiralAngle)*CFG.HAND_SPIRAL_TANGENT*spiralFalloff;
+      }
+      // ★ 手势增强：张掌排斥力场
+      if(pl.gestureType==='open'&&plOpenness>CFG.PALM_OPEN_THRESH&&pd<CFG.HAND_REPEL_RADIUS){
+        const repelFalloff=(1-pd/CFG.HAND_REPEL_RADIUS);
+        const repelF=repelFalloff*repelFalloff*CFG.HAND_REPEL_STRENGTH/pd;
+        pfx-=pdx*repelF;
+        pfy-=pdy*repelF;
+      }
+      // ★ 手势增强：近距离粒子发光增强
+      if(pd<80){
+        p._handGlow=Math.max(p._handGlow||0,(1-pd/80)*0.6);
+      }
+      if(pd<closestDist){closestDist=pd;closestOpenness=plOpenness;}}if(closestOpenness<CFG.HAND_CLOSE_THRESH){p.vx*=CFG.HAND_CLOSE_DAMP;p.vy*=CFG.HAND_CLOSE_DAMP;}}
+    let flwx=0,flwy=0;
+    if(S.followMode&&followTargets.length>0){for(const ft of followTargets){const fdx=ft.x-p.x,fdy=ft.y-p.y,fd=Math.sqrt(fdx*fdx+fdy*fdy)||1;if(fd<CFG.FOLLOW_RADIUS){const strength=ft.type==='palm'?CFG.FOLLOW_ATTRACT_FINGER:CFG.FOLLOW_ATTRACT_HEAD,falloff=1-fd/CFG.FOLLOW_RADIUS;flwx+=fdx*strength*falloff/fd;flwy+=fdy*strength*falloff/fd;}}}
+    p.vx+=dx*att+mfx+pfx+rfx+flwx;p.vy+=dy*att+mfy+pfy+rfy+flwy;
+    // ★ 轨道运动：单环细带，金色逆时针蓝色顺时针（望月全部逆时针）
+    let orbitDir=isY?-1:1;
+    if(lerpBhv(bhvP.allCCW?1:0,bhv.allCCW?1:0,blend)>0.5) orbitDir=-1;
+    // ★ 下弦月·螺旋收束：轨道半径缓慢缩小
+    if(bhv.special==='spiral'&&blend>0.5){
+      p.orbitRadiusFrac=Math.max(0.1125,p.orbitRadiusFrac-0.000015);
+      if(p.orbitRadiusFrac<=0.113){
+        p.orbitRadiusFrac=CFG.ORBIT_RING_CENTER_FRAC+(Math.random()-0.5)*CFG.ORBIT_RING_WIDTH_FRAC;
+        p.orbitSpeed=(CFG.ORBIT_ANGULAR_SPEED_BASE+Math.random()*CFG.ORBIT_ANGULAR_SPEED_RANGE);
+      }
+    }
+    // ★ 亏凸月·向内沉坠：随机粒子脱离轨道坠落
+    if(bhv.special==='fall'&&blend>0.5){
+      p.bhvTimer++;
+      if(p.bhvState===0&&Math.random()<0.001){p.bhvState=1;p.fallProgress=0;}
+      if(p.bhvState===1){
+        p.fallProgress+=0.008;
+        const fallR=p.orbitRadiusFrac*(1-p.fallProgress)*minDim;
+        const fallAngle=Math.atan2(p.y-cy,p.x-cx);
+        p.vx+=(cx+Math.cos(fallAngle)*fallR-p.x)*0.05;
+        p.vy+=(cy+Math.sin(fallAngle)*fallR-p.y)*0.05;
+        p.sz=Math.max(0.5,(2+Math.random()*2)*(1-p.fallProgress));
+        if(p.fallProgress>=1){
+          p.bhvState=0;p.fallProgress=0;
+          p.orbitAngle+=Math.PI;
+          p.orbitRadiusFrac=CFG.ORBIT_RING_CENTER_FRAC+(Math.random()-0.5)*CFG.ORBIT_RING_WIDTH_FRAC;
+          p.sz=2+Math.random()*2;
+        }
+      }
+    } else { p.bhvState=0; p.fallProgress=0; }
+    // ★ 盈凸月·径向喷薄：每秒向外射出光丝
+    if(bhv.special==='burst'&&blend>0.5){
+      p.bhvTimer++;
+      if(p.bhvTimer>=60){ p.burstBeamLen=15+Math.random()*15; p.bhvTimer=0; }
+      if(p.burstBeamLen>0){ p.burstBeamLen-=1.5; p.radialOffset=p.burstBeamLen; }
+      else { p.radialOffset=0; }
+    } else { p.burstBeamLen=0; p.radialOffset=0; }
+    // ★ 残月·轨迹偏离：±5px偏移
+    if(bhv.special==='ember'&&blend>0.5){
+      p.radialOffset=(Math.random()-0.5)*10;
+    }
+
+    p.orbitAngle+=p.orbitSpeed*orbitDir*speedMult;
+    const oR=p.orbitRadiusFrac*minDim;
+    const oA=oR*(1+p.orbitEcc),oB=oR*(1-p.orbitEcc);
+    const oex=oA*Math.cos(p.orbitAngle),oey=oB*Math.sin(p.orbitAngle);
+    const oCosT=Math.cos(p.orbitTilt),oSinT=Math.sin(p.orbitTilt);
+    let tgtX=cx+oex*oCosT-oey*oSinT,tgtY=cy+oex*oSinT+oey*oCosT;
+    // ★ 径向偏移（喷薄/残月偏离）
+    if(p.radialOffset!==0){
+      const rdx=tgtX-cx,rdy=tgtY-cy,rd=Math.sqrt(rdx*rdx+rdy*rdy)||1;
+      tgtX+=rdx/rd*p.radialOffset;
+      tgtY+=rdy/rd*p.radialOffset;
+    }
+    const effectiveOrbit=S.orbitStrength;
+    const oAttract=CFG.ORBIT_ATTRACT_STRENGTH*effectiveOrbit;
+    p.vx+=(tgtX-p.x)*oAttract;p.vy+=(tgtY-p.y)*oAttract;
+    const pDx=p.x-cx,pDy=p.y-cy,pDist=Math.sqrt(pDx*pDx+pDy*pDy)||1;
+    if(pDist>boundaryR){const excess=pDist-boundaryR;p.vx-=pDx/pDist*excess*CFG.ORBIT_BOUNDARY_FORCE;p.vy-=pDy/pDist*excess*CFG.ORBIT_BOUNDARY_FORCE;}
+    const dampMult=palmAny&&closestOpenness<CFG.HAND_CLOSE_DAMP2_THRESH?CFG.VEL_DAMP_PALM_CLOSE:CFG.VEL_DAMP;
+    p.vx*=dampMult;p.vy*=dampMult;p.x+=p.vx*sp;p.y+=p.vy*sp;
+    // ★ 月相行为：拖尾长度
+    const bhvTrail=Math.round(lerpBhv(bhvP.trailLen,bhv.trailLen,blend));
+    if(palmAny&&closestOpenness<CFG.HAND_CLOSE_DAMP2_THRESH){p.trail=[];}else{p.trail.push({x:p.x,y:p.y});const trailLen=palmAny?Math.round(CFG.TRAIL_LEN_PALM_BASE+maxOpenness*CFG.TRAIL_LEN_PALM_OPEN_MULT):Math.max(CFG.TRAIL_LEN_DEFAULT,bhvTrail);if(p.trail.length>trailLen)p.trail.shift();}
+  }
+}
+
+function updateMouseEffects(){
+  const dt=S.dt;
+  for(let i=S.clickPulses.length-1;i>=0;i--){const cp=S.clickPulses[i];cp.life-=dt;cp.r+=(cp.maxR-cp.r)*0.08;if(cp.life<=0){S.clickPulses.splice(i,1);continue;}const alpha=cp.life/cp.maxLife,forceStr=CFG.CLICK_PULSE_FORCE*alpha;for(const p of P){const dx=p.x-cp.x,dy=p.y-cp.y,dist=Math.sqrt(dx*dx+dy*dy)||1,ringDist=Math.abs(dist-cp.r),ringWidth=cp.r*0.18+15;if(ringDist<ringWidth&&dist>5){const ringFalloff=1-ringDist/ringWidth,f=forceStr*ringFalloff*ringFalloff/dist;p.vx+=dx*f;p.vy+=dy*f;}}}
+  for(let i=S.gesturePulses.length-1;i>=0;i--){const gp=S.gesturePulses[i];gp.life-=dt;gp.r+=(gp.maxR-gp.r)*0.06;if(gp.life<=0){S.gesturePulses.splice(i,1);continue;}const alpha=gp.life/gp.maxLife,forceStr=CFG.GESTURE_PULSE_FORCE*alpha;for(const p of P){const dx=p.x-gp.x,dy=p.y-gp.y,dist=Math.sqrt(dx*dx+dy*dy)||1,ringDist=Math.abs(dist-gp.r),ringWidth=gp.r*0.2+18;if(ringDist<ringWidth&&dist>5){const ringFalloff=1-ringDist/ringWidth,f=forceStr*ringFalloff/dist;p.vx+=dx*f;p.vy+=dy*f;}}}
+  const glowTarget=S.mspeed>2?Math.min(1,(S.mspeed-2)/18):0;S.mouseGlow+=(glowTarget-S.mouseGlow)*0.12;
+  if(S.mspeed>CFG.TRAIL_PARTICLE_SPAWN_SPEED){const spawnCount=Math.min(CFG.TRAIL_PARTICLE_SPAWN,Math.floor(S.mspeed/6));for(let i=0;i<spawnCount;i++){if(S.trailParticles.length>=CFG.TRAIL_PARTICLE_COUNT)S.trailParticles.shift();const angle=Math.atan2(S.mvy,S.mvx)+Math.PI+(Math.random()-0.5)*1.2,spd=CFG.TRAIL_PARTICLE_SPEED_MIN+Math.random()*S.mspeed*0.15,spread=(Math.random()-0.5)*16,isYang=S.yang>50;S.trailParticles.push({x:S.mx+spread*Math.cos(angle+Math.PI/2),y:S.my+spread*Math.sin(angle+Math.PI/2),vx:Math.cos(angle)*spd,vy:Math.sin(angle)*spd,life:CFG.TRAIL_PARTICLE_LIFE,maxLife:CFG.TRAIL_PARTICLE_LIFE,size:CFG.TRAIL_PARTICLE_SIZE*(0.5+Math.random()),color:[isYang?255:34,isYang?204+Math.round(Math.random()*42):102+Math.round(Math.random()*65),isYang?102:204]});}}
+  for(let i=S.trailParticles.length-1;i>=0;i--){const tp=S.trailParticles[i];tp.life-=dt;if(tp.life<=0){S.trailParticles.splice(i,1);continue;}tp.x+=tp.vx*60*dt;tp.y+=tp.vy*60*dt;tp.vx*=0.96;tp.vy*=0.96;}
+  // ★ 手势增强：手部拖尾能量粒子
+  if(S.camOn){
+    S.handSpiralAngle+=0.05;
+    S.palms.forEach((palm,idx)=>{
+      if(!palm.effective)return;
+      const px=palm.x*CW,py=palm.y*CH;
+      const isLeft=idx===0;
+      // 持续生成拖尾粒子
+      if(Math.random()<CFG.HAND_TRAIL_RATE+palm.speed*0.15){
+        const offA=S.handSpiralAngle+idx*Math.PI;
+        const offR=8+Math.random()*15;
+        const sx=px+Math.cos(offA)*offR,sy=py+Math.sin(offA)*offR;
+        if(S.handTrails.length<CFG.HAND_TRAIL_MAX){
+          S.handTrails.push({x:sx,y:sy,vx:(Math.random()-0.5)*0.8+palm.vx*20,vy:(Math.random()-0.5)*0.8+palm.vy*20,life:CFG.HAND_TRAIL_LIFE,maxLife:CFG.HAND_TRAIL_LIFE,size:1.2+Math.random()*2.5,r:isLeft?255:80,g:isLeft?210:160,b:isLeft?80:255});
+        }
+      }
+    });
+  }
+  // 更新手部拖尾粒子
+  for(let i=S.handTrails.length-1;i>=0;i--){const tp=S.handTrails[i];tp.life--;if(tp.life<=0){S.handTrails.splice(i,1);continue;}tp.x+=tp.vx;tp.y+=tp.vy;tp.vx*=0.94;tp.vy*=0.94;tp.vy+=0.02;}
+  // ★ 排斥脉冲更新
+  for(let i=S.handRepelPulse.length-1;i>=0;i--){const rp=S.handRepelPulse[i];rp.life-=dt;rp.r+=(rp.maxR-rp.r)*0.12;if(rp.life<=0){S.handRepelPulse.splice(i,1);continue;}const alpha=rp.life/rp.maxLife,forceStr=CFG.HAND_REPEL_PULSE_FORCE*alpha;for(const p of P){const dx=p.x-rp.x,dy=p.y-rp.y,dist=Math.sqrt(dx*dx+dy*dy)||1;if(dist<rp.r+30&&dist>5){const f=forceStr*(1-dist/(rp.r+30))/dist;p.vx+=dx*f;p.vy+=dy*f;}}}
+  // 粒子手部发光衰减
+  for(const p of P){if(p._handGlow){p._handGlow*=0.92;if(p._handGlow<0.01)p._handGlow=0;}}
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ★ 4. 发光星尘粒子（径向渐变，中心白边缘金/蓝，shadowBlur星核）
+// ═══════════════════════════════════════════════════════════════
+function drawParticles(){
+  const yr=S.yang/100;
+  const palmAny=S.camOn&&S.palms.some(p=>p.effective);
+  const maxOpenness=palmAny?Math.max(...S.palms.filter(p=>p.effective).map(p=>p.openness)):0.5;
+  const bhvIdx=S.moonBhvIdx,bhvPrev=S.moonBhvPrevIdx,blend=S.moonBhvBlend;
+  const bhv=getBhv(bhvIdx),bhvP=getBhv(bhvPrev);
+  const colorDarken=lerpBhv(bhvP.colorDarken,bhv.colorDarken,blend);
+  const glowMult=lerpBhv(bhvP.glowMult,bhv.glowMult,blend);
+  const brightBase=lerpBhv(bhvP.brightBase,bhv.brightBase,blend);
+  const brightRange=lerpBhv(bhvP.brightRange,bhv.brightRange,blend);
+  neighborTimer++;
+  if(neighborTimer>=15){neighborTimer=0;neighborBlend.fill(0);for(let i=0;i<NP;i++){if(neighborBlend[i])continue;for(let j=i+1;j<NP;j++){if(P[i].type===P[j].type)continue;const dx2=P[i].x-P[j].x,dy2=P[i].y-P[j].y;if(dx2*dx2+dy2*dy2<600){neighborBlend[i]=1;neighborBlend[j]=1;}}}}
+  // ★ 望月·极光模式：lighter混合
+  const auroraBlend=bhv.special==='aurora'?blend:0;
+  if(auroraBlend>0.3) ctx.globalCompositeOperation='lighter';
+  ctx.save();
+  for(let i=0;i<NP;i++){
+    const p=P[i],isY=p.type==='yang',blend2=neighborBlend[i];
+    if(!p.visible) continue; // ★ 残月：半数粒子不绘制
+    let r,g,b;
+    if(isY){r=CFG.COLOR_YANG_R;g=CFG.COLOR_YANG_G+Math.round(yr*CFG.COLOR_YANG_G_RANGE);b=CFG.COLOR_YANG_B;}
+    else{r=CFG.COLOR_YIN_R;g=CFG.COLOR_YIN_G+Math.round((1-yr)*CFG.COLOR_YIN_G_RANGE);b=CFG.COLOR_YIN_B;}
+    // ★ 月相颜色变暗
+    if(colorDarken>0){
+      r=Math.round(r*(1-colorDarken));
+      g=Math.round(g*(1-colorDarken));
+      b=Math.round(b*(1-colorDarken));
+      // 蛾眉月：色调偏青
+      if(bhv.special==='breathe'&&blend>0.5){b=Math.min(255,b+40);}
+    }
+    let alpha_mult=1.0,sz_mult=1.0;
+    if(palmAny){if(maxOpenness<CFG.PALM_CLOSE_THRESH){alpha_mult=CFG.PALM_COLOR_CLOSE_ALPHA_BOOST+(CFG.PALM_CLOSE_THRESH-maxOpenness)*CFG.PALM_COLOR_CLOSE_ALPHA_RANGE;sz_mult=CFG.PALM_COLOR_CLOSE_SIZE_BOOST+(CFG.PALM_CLOSE_THRESH-maxOpenness)*CFG.PALM_COLOR_CLOSE_SIZE_RANGE;}else{alpha_mult=1.0-(maxOpenness-CFG.PALM_CLOSE_THRESH)*CFG.PALM_COLOR_OPEN_ALPHA_REDUCE;}}
+    // ★ 月相行为亮度
+    let bhvBright=brightBase+Math.random()*brightRange;
+    // ★ 上弦月·交替闪烁：相邻粒子不同时亮
+    if(bhv.special==='pulse'&&blend>0.5){
+      const pulseCycle=1.5; // 1秒亮+0.5秒灭
+      const phase=((S.time+p.flickerPhase)/pulseCycle)%1;
+      bhvBright = phase<0.67 ? brightBase+brightRange : brightBase*0.15;
+    }
+    // ★ 残月·随机闪烁
+    if(bhv.special==='ember'&&blend>0.5){
+      bhvBright = Math.random()>0.6 ? brightBase+brightRange : brightBase*0.2;
+    }
+    // ★ 亏凸月·坠落粒子缩小
+    if(bhv.special==='fall'&&blend>0.5&&p.bhvState===1){
+      sz_mult*=(1-p.fallProgress);
+      alpha_mult*=(1-p.fallProgress*0.7);
+    }
+
+    const br=Math.min(1,(isY?CFG.COLOR_BRIGHTNESS_YANG_BASE+yr*CFG.COLOR_BRIGHTNESS_YANG_RANGE:CFG.COLOR_BRIGHTNESS_YIN_BASE+(1-yr)*CFG.COLOR_BRIGHTNESS_YIN_RANGE)*alpha_mult*bhvBright);
+    const sz=p.sz*sz_mult;
+    let glowBoost=1.0,szGlowBoost=1.0;
+    if(S.mouseGlow>0.03){const mdx2=p.x-S.mx,mdy2=p.y-S.my,md2=Math.sqrt(mdx2*mdx2+mdy2*mdy2),glowR=CFG.MOUSE_GLOW_RADIUS;if(md2<glowR){const falloff=1-md2/glowR,boost=S.mouseGlow*falloff;glowBoost=1.0+boost*CFG.MOUSE_GLOW_BRIGHTNESS;szGlowBoost=1.0+boost*CFG.MOUSE_GLOW_SIZE_BOOST;}}
+    glowBoost*=glowMult;
+    // ★ 手势增强：手掌附近粒子发光
+    if(p._handGlow&&p._handGlow>0.01){
+      glowBoost*=1+p._handGlow*2;
+      szGlowBoost*=1+p._handGlow;
+    }
+    // ★ 拖尾绘制
+    if(p.trail.length>1&&maxOpenness>=CFG.PALM_CLOSE_THRESH){
+      const trailAlpha=palmAny?CFG.TRAIL_ALPHA_PALM_BASE+maxOpenness*CFG.TRAIL_ALPHA_PALM_RANGE:CFG.TRAIL_ALPHA_DEFAULT;
+      for(let k=1;k<p.trail.length;k++){
+        const a=(k/p.trail.length)*trailAlpha*glowMult;
+        let tr=r,tg=g,tb=b;
+        if(blend2){const m=k/p.trail.length;tr=isY?Math.round(255*(1-m)+34*m):Math.round(34*(1-m)+255*m);tg=Math.round(150);tb=isY?Math.round(102*(1-m)+204*m):Math.round(204*(1-m)+102*m);}
+        const trFade=palmAny?1.0-maxOpenness*CFG.TRAIL_FADE_OPEN_MULT:1.0;
+        ctx.beginPath();ctx.moveTo(p.trail[k-1].x,p.trail[k-1].y);ctx.lineTo(p.trail[k].x,p.trail[k].y);
+        ctx.strokeStyle=`rgba(${tr},${tg},${tb},${a*trFade})`;ctx.lineWidth=sz*CFG.TRAIL_WIDTH_MULT;ctx.stroke();
+      }
+    }
+    // ★ 盈凸月·径向光丝
+    if(bhv.special==='burst'&&blend>0.5&&p.burstBeamLen>0){
+      const cx2=CW/2,cy2=CH/2;
+      const rdx=p.x-cx2,rdy=p.y-cy2,rd=Math.sqrt(rdx*rdx+rdy*rdy)||1;
+      const beamEndX=p.x+rdx/rd*p.burstBeamLen;
+      const beamEndY=p.y+rdy/rd*p.burstBeamLen;
+      const beamAlpha=Math.min(1,p.burstBeamLen/20)*0.6;
+      ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(beamEndX,beamEndY);
+      ctx.strokeStyle=`rgba(${r},${g},${b},${beamAlpha})`;ctx.lineWidth=1.5;ctx.stroke();
+    }
+    // ★ 简化粒子绘制（无渐变，性能优化）
+    const finalSz=sz*szGlowBoost;
+    const coreAlpha=Math.min(1,br*glowBoost);
+    // 外层光晕
+    ctx.globalAlpha = coreAlpha * 0.35;
+    ctx.fillStyle = `rgb(${r},${g},${b})`;
+    ctx.beginPath();ctx.arc(p.x,p.y,finalSz*1.5,0,Math.PI*2);ctx.fill();
+    // 中层
+    ctx.globalAlpha = coreAlpha * 0.65;
+    ctx.beginPath();ctx.arc(p.x,p.y,finalSz*0.9,0,Math.PI*2);ctx.fill();
+    // 内层亮核
+    ctx.globalAlpha = coreAlpha * 0.95;
+    ctx.fillStyle = `rgb(${Math.min(255,r+80)},${Math.min(255,g+80)},${Math.min(255,b+80)})`;
+    ctx.beginPath();ctx.arc(p.x,p.y,finalSz*0.45,0,Math.PI*2);ctx.fill();
+    ctx.globalAlpha = 1.0;
+  }
+  if(auroraBlend>0.3) ctx.globalCompositeOperation='source-over';
+  ctx.restore();
+}
+
+function drawHarmony(){
+  if(!S.harmonyActive)return;const cx=CW/2,cy=CH/2,t=S.time;ctx.save();
+  for(let i=1;i<=5;i++){const R=90+i*45+Math.sin(t*1.2+i)*10;ctx.globalAlpha=0.22;ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.strokeStyle=i%2===0?'rgba(255,204,102,0.5)':'rgba(34,102,204,0.5)';ctx.lineWidth=1.5;ctx.stroke();}
+  ctx.restore();
+}
+
+function drawClickPulses(){
+  for(const cp of S.clickPulses){const alpha=cp.life/cp.maxLife,isYang=cp.type==='yang',ringAlpha=CFG.CLICK_PULSE_GLOW_A*alpha;const grad=ctx.createRadialGradient(cp.x,cp.y,cp.r*0.7,cp.x,cp.y,cp.r*1.15);if(isYang){grad.addColorStop(0,'rgba(255,220,80,0)');grad.addColorStop(0.6,`rgba(255,200,60,${ringAlpha*0.8})`);grad.addColorStop(1,'rgba(255,180,40,0)');}else{grad.addColorStop(0,'rgba(34,102,204,0)');grad.addColorStop(0.6,`rgba(34,102,204,${ringAlpha*0.8})`);grad.addColorStop(1,'rgba(20,60,150,0)');}ctx.fillStyle=grad;ctx.beginPath();ctx.arc(cp.x,cp.y,cp.r*1.15,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(cp.x,cp.y,cp.r,0,Math.PI*2);ctx.strokeStyle=isYang?`rgba(255,210,70,${ringAlpha*1.4})`:`rgba(60,120,220,${ringAlpha*1.4})`;ctx.lineWidth=2.5*alpha;ctx.stroke();}
+  for(const gp of S.gesturePulses){const alpha=gp.life/gp.maxLife;const grad=ctx.createRadialGradient(gp.x,gp.y,gp.r*0.6,gp.x,gp.y,gp.r*1.2);grad.addColorStop(0,'rgba(255,255,240,0)');grad.addColorStop(0.5,`rgba(200,180,255,${alpha*0.6})`);grad.addColorStop(1,'rgba(180,140,255,0)');ctx.fillStyle=grad;ctx.beginPath();ctx.arc(gp.x,gp.y,gp.r*1.2,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(gp.x,gp.y,gp.r,0,Math.PI*2);ctx.strokeStyle=`rgba(200,160,255,${alpha})`;ctx.lineWidth=3*alpha;ctx.stroke();}
+}
+
+function drawMouseGlow(){
+  if(S.mouseGlow<0.03)return;const alpha=S.mouseGlow;const grad=ctx.createRadialGradient(S.mx,S.my,0,S.mx,S.my,CFG.MOUSE_GLOW_RADIUS);const yr=S.yang/100;if(yr>0.5){grad.addColorStop(0,`rgba(255,230,140,${alpha*0.5})`);grad.addColorStop(0.5,`rgba(255,200,80,${alpha*0.2})`);}else{grad.addColorStop(0,`rgba(100,160,255,${alpha*0.5})`);grad.addColorStop(0.5,`rgba(34,102,204,${alpha*0.2})`);}grad.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=grad;ctx.beginPath();ctx.arc(S.mx,S.my,CFG.MOUSE_GLOW_RADIUS,0,Math.PI*2);ctx.fill();
+}
+
+function drawTrailParticles(){
+  for(const tp of S.trailParticles){const alpha=tp.life/tp.maxLife,[r,g,b]=tp.color;const grad=ctx.createRadialGradient(tp.x,tp.y,0,tp.x,tp.y,tp.size*3);grad.addColorStop(0,`rgba(${Math.min(255,r+40)},${Math.min(255,g+40)},${Math.min(255,b+40)},${alpha*0.9})`);grad.addColorStop(0.4,`rgba(${r},${g},${b},${alpha*0.6})`);grad.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=grad;ctx.beginPath();ctx.arc(tp.x,tp.y,tp.size*3,0,Math.PI*2);ctx.fill();}
+}
+
+// ★ 手势增强：手部能量拖尾 + 排斥脉冲绘制
+function drawHandTrails(){
+  if(!S.handTrails.length&&!S.handRepelPulse.length) return;
+  ctx.save();
+  // 手部能量拖尾
+  for(const tp of S.handTrails){
+    const alpha=tp.life/tp.maxLife;
+    if(alpha<0.01) continue;
+    const grad=ctx.createRadialGradient(tp.x,tp.y,0,tp.x,tp.y,tp.size*3);
+    grad.addColorStop(0,`rgba(${Math.min(255,tp.r+50)},${Math.min(255,tp.g+40)},${Math.min(255,tp.b+30)},${alpha*0.85})`);
+    grad.addColorStop(0.35,`rgba(${tp.r},${tp.g},${tp.b},${alpha*0.5})`);
+    grad.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=grad;ctx.beginPath();ctx.arc(tp.x,tp.y,tp.size*3,0,Math.PI*2);ctx.fill();
+  }
+  // 排斥冲击波
+  for(const rp of S.handRepelPulse){
+    const alpha=rp.life/rp.maxLife;
+    const isLeft=rp.handIdx===0;
+    const colR=isLeft?255:80,colG=isLeft?220:160,colB=isLeft?100:255;
+    // 冲击波环
+    ctx.beginPath();ctx.arc(rp.x,rp.y,rp.r,0,Math.PI*2);
+    ctx.strokeStyle=`rgba(${colR},${colG},${colB},${alpha*0.9})`;
+    ctx.lineWidth=3.5*alpha;ctx.stroke();
+    // 内部发光
+    const grad=ctx.createRadialGradient(rp.x,rp.y,rp.r*0.3,rp.x,rp.y,rp.r);
+    grad.addColorStop(0,`rgba(${colR},${colG},${colB},${alpha*0.3})`);
+    grad.addColorStop(0.7,`rgba(${colR},${colG},${colB},${alpha*0.1})`);
+    grad.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=grad;ctx.beginPath();ctx.arc(rp.x,rp.y,rp.r,0,Math.PI*2);ctx.fill();
+  }
+  ctx.restore();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ★ 7. 后处理：暗角 + 轻微泛光
+// ═══════════════════════════════════════════════════════════════
+function drawVignette(){
+  const gr=ctx.createRadialGradient(CW/2,CH/2,Math.min(CW,CH)*0.3,CW/2,CH/2,Math.max(CW,CH)*0.75);
+  gr.addColorStop(0,'rgba(0,0,0,0)');gr.addColorStop(0.6,'rgba(0,0,0,0)');gr.addColorStop(1,'rgba(0,0,0,0.55)');
+  ctx.fillStyle=gr;ctx.fillRect(0,0,CW,CH);
+}
+
+let bloomCanvas=null,bloomCtx=null,bloomFrame=0;
+function drawBloom(){
+  bloomFrame++;if(bloomFrame%6!==0)return;
+  if(!bloomCanvas||bloomCanvas.width!==Math.max(1,Math.floor(CW/4))||bloomCanvas.height!==Math.max(1,Math.floor(CH/4))){
+    bloomCanvas=document.createElement('canvas');bloomCanvas.width=Math.max(1,Math.floor(CW/4));bloomCanvas.height=Math.max(1,Math.floor(CH/4));bloomCtx=bloomCanvas.getContext('2d');
+  }
+  bloomCtx.drawImage(canvas,0,0,bloomCanvas.width,bloomCanvas.height);
+  ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=0.08;ctx.filter='blur(4px)';
+  ctx.drawImage(bloomCanvas,0,0,CW,CH);ctx.filter='none';ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';ctx.restore();
+}
+
+const cursorTrail=[];
+document.addEventListener('mousemove',e=>{
+  cursorEl.style.left=e.clientX+'px';cursorEl.style.top=e.clientY+'px';
+  cursorEl.style.width=S.mspeed>15?'28px':'18px';cursorEl.style.height=S.mspeed>15?'28px':'18px';
+  const repulseVis=Math.min(S.mspeed/40,1);
+  cursorEl.style.borderColor=`rgba(255,${Math.round(204-repulseVis*60)},${Math.round(102-repulseVis*80)},0.7)`;
+  cursorTrail.push({x:e.clientX,y:e.clientY,t:Date.now()});if(cursorTrail.length>30)cursorTrail.shift();
+});
+
+function drawCursorTrail(){
+  const now=Date.now();
+  for(let i=1;i<cursorTrail.length;i++){const age=(now-cursorTrail[i].t)/600;if(age>1)continue;const a=(1-age)*0.2;ctx.beginPath();ctx.moveTo(cursorTrail[i-1].x,cursorTrail[i-1].y);ctx.lineTo(cursorTrail[i].x,cursorTrail[i].y);const repulseVis=Math.min(S.mspeed/40,1);ctx.strokeStyle=`rgba(255,${Math.round(204-repulseVis*60)},${Math.round(102-repulseVis*80)},${a})`;ctx.lineWidth=1.5;ctx.stroke();}
+}
+
+function drawMeter(){
+  const mc=mX;mc.clearRect(0,0,96,96);const cx2=48,cy2=52,r=34,yr=S.yang/100,angle=-Math.PI/2+(yr*2-1)*Math.PI*0.58;
+  mc.beginPath();mc.arc(cx2,cy2,r,Math.PI*0.88,Math.PI*2.12);mc.strokeStyle='rgba(90,90,90,0.35)';mc.lineWidth=3.5;mc.stroke();
+  mc.beginPath();mc.arc(cx2,cy2,r,Math.PI*0.88,Math.PI*1.5);mc.strokeStyle='rgba(34,102,204,0.72)';mc.lineWidth=4.5;mc.stroke();
+  mc.beginPath();mc.arc(cx2,cy2,r,Math.PI*1.5,Math.PI*2.12);mc.strokeStyle='rgba(255,204,102,0.72)';mc.lineWidth=4.5;mc.stroke();
+  mc.save();mc.translate(cx2,cy2);mc.rotate(angle);mc.beginPath();mc.moveTo(0,5);mc.lineTo(0,-r+5);mc.strokeStyle='rgba(255,240,175,0.92)';mc.lineWidth=2;mc.stroke();mc.restore();
+  mc.beginPath();mc.arc(cx2,cy2,4.5,0,Math.PI*2);mc.fillStyle='rgba(255,240,175,0.82)';mc.fill();
+  mc.font='bold 10px 宋体';mc.fillStyle='rgba(34,102,204,0.8)';mc.fillText('阴',8,cy2+3);mc.fillStyle='rgba(255,204,102,0.8)';mc.fillText('阳',74,cy2+3);
+  mc.font='9px 宋体';mc.fillStyle='rgba(200,200,200,0.65)';mc.textAlign='center';mc.fillText(Math.round(S.yang)+'% 阳',cx2,cy2+22);mc.textAlign='start';
+  if(S.balSec>0){balTimeEl.textContent=`平衡 ${S.balSec}s / 60s`;}else{balTimeEl.textContent='';}
+}
+
+function triggerDawn(){if(S.dawnActive)return;S.dawnActive=true;S.dawnProg=0;S.yang=Math.min(CFG.Y_MAX,S.yang+32);S.yin=100-S.yang;showStatus('阴极阳生 · 黎明破晓 · 新月转满月');flashScreen('rgba(255,145,45,0.45)');const iv=setInterval(()=>{S.dawnProg+=0.018;if(S.dawnProg>=1){S.dawnActive=false;clearInterval(iv);}},50);}
+function triggerDusk(){if(S.duskActive)return;S.duskActive=true;S.duskProg=0;S.yin=Math.min(CFG.Y_MAX,S.yin+32);S.yang=100-S.yin;showStatus('阳极阴生 · 黄昏暮色 · 满月转新月');flashScreen('rgba(75,0,110,0.42)');const iv=setInterval(()=>{S.duskProg+=0.018;if(S.duskProg>=1){S.duskActive=false;clearInterval(iv);}},50);}
+function flashScreen(color){flashEl.style.background=color;flashEl.style.opacity='0.72';setTimeout(()=>{flashEl.style.opacity='0';},280);}
+function showStatus(msg){statusEl.textContent=msg;statusEl.style.opacity='1';clearTimeout(statusEl._t);statusEl._t=setTimeout(()=>{statusEl.style.opacity='0.45';},3500);}
+
+let suggestTimeout=null;
+function showMoonSuggestion(phaseIdx){const mp=MOON_PHASES[phaseIdx];suggestCard.querySelector('.phase-icon').textContent=mp.glyph;suggestCard.querySelector('.phase-name').textContent=mp.name;suggestCard.querySelector('.phase-trigram').textContent=mp.trigram+' · '+mp.advice.split('。')[0].split('，')[0]+' · '+mp.tide;suggestCard.querySelector('.phase-advice').textContent=mp.advice;suggestCard.querySelector('.phase-freq').textContent='共振频率 '+mp.freq+' Hz · '+mp.freqDesc;suggestCard.style.borderColor=mp.yinDominant?'rgba(100,160,255,0.5)':'rgba(255,220,100,0.5)';suggestOverlay.style.opacity='1';suggestOverlay.style.pointerEvents='all';}
+function hideMoonSuggestion(){suggestOverlay.style.opacity='0';suggestOverlay.style.pointerEvents='none';clearTimeout(suggestTimeout);}
+function lockMoonPhase(phaseIdx){const mp=MOON_PHASES[phaseIdx];S.lockedPhase=phaseIdx;S.lockedPhaseTimer=CFG.LOCK_DURATION;S.yang=mp.yang;S.yin=mp.yin;triggerMoonBhvTransition(phaseIdx);showMoonSuggestion(phaseIdx);showStatus('锁定月相：'+mp.name+' · '+mp.glyph+' · 阳'+mp.yang+'% 阴'+mp.yin+'% · '+MOON_BEHAVIORS[phaseIdx].name+' · '+mp.freq+'Hz');document.querySelectorAll('.moon-btn').forEach((b,i)=>{b.classList.toggle('active',i===phaseIdx);});}
+document.querySelectorAll('.moon-btn').forEach((btn,idx)=>{btn.addEventListener('click',(e)=>{e.stopPropagation();lockMoonPhase(idx);});});
+document.getElementById('suggestion-close').addEventListener('click',(e)=>{e.stopPropagation();hideMoonSuggestion();});
+suggestOverlay.addEventListener('click',(e)=>{if(e.target===suggestOverlay)hideMoonSuggestion();});
+
+document.getElementById('btn-sound').addEventListener('click',()=>{
+  if(!S.audioOn){initAudio();S.audioOn=true;document.getElementById('btn-sound').classList.add('on');document.getElementById('btn-sound').textContent='音境·开';S.ac.resume();}else{S.audioOn=false;document.getElementById('btn-sound').classList.remove('on');document.getElementById('btn-sound').textContent='音境';if(S.mgain)S.mgain.gain.setTargetAtTime(0,S.ac.currentTime,0.3);}
+});
+
+let camCvs=null,camCtx2=null,lastGestureTime=0;
+document.getElementById('btn-cam').addEventListener('click',async()=>{
+  if(!S.camOn){try{const stream=await navigator.mediaDevices.getUserMedia({video:{width:640,height:480,facingMode:'user'}});S.camStream=stream;const vid=document.getElementById('cam-video');vid.srcObject=stream;document.getElementById('cam-preview').style.display='block';document.getElementById('btn-cam').classList.add('on');document.getElementById('btn-cam').textContent='灵眸·开';S.camOn=true;palmEl.style.display='block';showStatus('灵眸开启 · 伸出手掌 · 左手控金 右手控蓝 · 捏合查月相 · 合十归元');startCam(vid);}catch(e){showStatus('摄像头授权失败，可纯鼠标体验完整功能');}}else{if(S.camStream)S.camStream.getTracks().forEach(t=>t.stop());document.getElementById('cam-preview').style.display='none';document.getElementById('btn-cam').classList.remove('on');document.getElementById('btn-cam').textContent='灵眸';S.camOn=false;S.palms[0].detected=false;S.palms[0].effective=false;S.palms[1].detected=false;S.palms[1].effective=false;palmEl.style.display='none';}
+});
+
+function startCam(video){
+  camCvs=document.createElement('canvas');camCvs.width=CFG.CAM_W;camCvs.height=CFG.CAM_H;camCtx2=camCvs.getContext('2d');
+  const intv=1000/CFG.CAM_FPS;
+  setInterval(()=>{
+    if(!S.camOn||video.readyState<2)return;
+    camCtx2.save();camCtx2.scale(-1,1);camCtx2.drawImage(video,-CFG.CAM_W,0,CFG.CAM_W,CFG.CAM_H);camCtx2.restore();
+    const d=camCtx2.getImageData(0,0,CFG.CAM_W,CFG.CAM_H).data;const halfW=CFG.CAM_W/2;
+    let lSX=0,lSY=0,lCnt=0,lSumR=0,lSumG=0,lSumB=0,lMinX=CFG.CAM_W,lMinY=CFG.CAM_H,lMaxX=0,lMaxY=0;
+    let rSX=0,rSY=0,rCnt=0,rSumR=0,rSumG=0,rSumB=0,rMinX=CFG.CAM_W,rMinY=CFG.CAM_H,rMaxX=0,rMaxY=0;
+    for(let y=0;y<CFG.CAM_H;y++){for(let x=0;x<CFG.CAM_W;x++){const i=(y*CFG.CAM_W+x)*4;const r=d[i],g=d[i+1],b=d[i+2];const mx=Math.max(r,g,b),mn=Math.min(r,g,b),delta2=mx-mn;let h=0;if(delta2>3){if(mx===r)h=60*(((g-b)/delta2)%6);else if(mx===g)h=60*((b-r)/delta2+2);else h=60*((r-g)/delta2+4);}if(h<0)h+=360;const ss=mx===0?0:delta2/mx,vv=mx;const hsvSkin=(h>=0&&h<=42)&&(ss>=0.12&&ss<=0.88)&&(vv>=30&&vv<=248);if(!hsvSkin)continue;if(CFG.SKIN_ADAPTIVE_ENABLED&&S.skinAdaptFrame>CFG.SKIN_ADAPTIVE_FRAMES){const dr2=r-S.skinMeanR,dg2=g-S.skinMeanG,db2=b-S.skinMeanB;if(Math.sqrt(dr2*dr2+dg2*dg2+db2*db2)>50)continue;}if(x<halfW){lSX+=x;lSY+=y;lCnt++;lSumR+=r;lSumG+=g;lSumB+=b;if(x<lMinX)lMinX=x;if(x>lMaxX)lMaxX=x;if(y<lMinY)lMinY=y;if(y>lMaxY)lMaxY=y;}else{rSX+=x;rSY+=y;rCnt++;rSumR+=r;rSumG+=g;rSumB+=b;if(x<rMinX)rMinX=x;if(x>rMaxX)rMaxX=x;if(y<rMinY)rMinY=y;if(y>rMaxY)rMaxY=y;}}}
+    const totalPixels=CFG.CAM_W*CFG.CAM_H,halfPx=totalPixels/2;
+    const totalSkin=lCnt+rCnt;
+    if(CFG.SKIN_ADAPTIVE_ENABLED&&totalSkin>80){const avgR=(lSumR+rSumR)/totalSkin,avgG=(lSumG+rSumG)/totalSkin,avgB=(lSumB+rSumB)/totalSkin,lr=CFG.SKIN_ADAPTIVE_LEARN;if(S.skinAdaptFrame===0){S.skinMeanR=avgR;S.skinMeanG=avgG;S.skinMeanB=avgB;}else{S.skinMeanR+=(avgR-S.skinMeanR)*lr;S.skinMeanG+=(avgG-S.skinMeanG)*lr;S.skinMeanB+=(avgB-S.skinMeanB)*lr;}S.skinAdaptFrame++;S.skinConfidence=Math.min(1,totalSkin/(totalPixels*0.12));}
+    const clusters=[{sx:lSX,sy:lSY,cnt:lCnt,minX:lMinX,minY:lMinY,maxX:lMaxX,maxY:lMaxY,pi:0},{sx:rSX,sy:rSY,cnt:rCnt,minX:rMinX,minY:rMinY,maxX:rMaxX,maxY:rMaxY,pi:1}];
+    for(const cl of clusters){const palm=S.palms[cl.pi];if(cl.cnt===0){palm.confirmCnt=0;palm.lostCnt++;palm.effective=false;if(palm.lostCnt>=CFG.PALM_LOST_FRAMES){palm.detected=false;palm.attract*=CFG.PALM_ATTRACT_DECAY;palm.areaSmooth*=CFG.PALM_AREA_DECAY;if(palm.attract<CFG.PALM_ATTRACT_MIN)palm.attract=0;}continue;}const ratio=cl.cnt/halfPx;const boxW=cl.maxX>cl.minX+5?cl.maxX-cl.minX:0;const boxH=cl.maxY>cl.minY+5?cl.maxY-cl.minY:0;const aspect=boxW>0&&boxH>0?boxW/boxH:0;const aspectOK=aspect>=CFG.PALM_ASPECT_MIN&&aspect<=CFG.PALM_ASPECT_MAX;const areaOK=ratio>CFG.PALM_AREA_THRESH&&cl.cnt>CFG.PALM_PIXEL_MIN;const effectiveOK=ratio>CFG.PALM_EFFECTIVE_DIST_THRESH;const cy=cl.cnt>0?cl.sy/cl.cnt/CFG.CAM_H:1;const yOK=cy>0.22;const candidate=areaOK&&aspectOK&&yOK&&boxW>12&&boxH>12;if(candidate){palm.confirmCnt++;palm.lostCnt=0;if(palm.confirmCnt>=CFG.PALM_CONFIRM_FRAMES){const cx2=cl.sx/cl.cnt/CFG.CAM_W;palm.prevX=palm.x;palm.prevY=palm.y;palm.x+=(cx2-palm.x)*CFG.PALM_POS_SMOOTH;palm.y+=(cy-palm.y)*CFG.PALM_POS_SMOOTH;palm.vx=palm.x-palm.prevX;palm.vy=palm.y-palm.prevY;palm.speed=Math.sqrt(palm.vx*palm.vx+palm.vy*palm.vy)*CFG.PALM_SPEED_UNIT;palm.areaSmooth+=(ratio-palm.areaSmooth)*CFG.PALM_AREA_SMOOTH;palm.openness=Math.min(1,Math.max(0,(palm.areaSmooth-CFG.PALM_AREA_MIN)/CFG.PALM_AREA_RANGE));palm.attract+=(Math.min(1,ratio/CFG.PALM_AREA_RANGE)-palm.attract)*CFG.PALM_ATTRACT_SMOOTH;palm.detected=true;palm.effective=effectiveOK;}}else{palm.confirmCnt=0;palm.lostCnt++;if(palm.lostCnt>=CFG.PALM_LOST_FRAMES){palm.detected=false;palm.effective=false;palm.attract*=CFG.PALM_ATTRACT_DECAY;palm.areaSmooth*=CFG.PALM_AREA_DECAY;}}}
+    const now=Date.now(),p0=S.palms[0],p1=S.palms[1];const bothEff=p0.effective&&p1.effective,anyEff=p0.effective||p1.effective;S.bothHandsEffective=bothEff;
+    if(bothEff){const dx_p=p1.x-p0.x,dy_p=p1.y-p0.y;S.prevBothHandDist=S.bothHandDist;S.bothHandDist=Math.sqrt(dx_p*dx_p+dy_p*dy_p);}else{S.prevBothHandDist=S.bothHandDist;S.bothHandDist=9999;}
+    const gestureReady=(now-lastGestureTime)>CFG.GESTURE_COOLDOWN;
+    S.palms.forEach((palm,idx)=>{if(!palm.effective){palm.gestureType='none';palm.pinchConfirmed=false;palm.pinchFrames=0;return;}if(palm.openness<CFG.PALM_PINCH_THRESH){palm.pinchFrames++;if(palm.pinchFrames>=CFG.PINCH_CONFIRM_FRAMES){palm.pinchConfirmed=true;palm.gestureType='pinch';}}else{palm.pinchFrames=Math.max(0,palm.pinchFrames-1);if(palm.pinchFrames<3)palm.pinchConfirmed=false;}if(palm.speed>CFG.PALM_SPEED_PUSH&&palm.vy<-0.003){palm.gestureType='push';}else if(palm.openness>CFG.PALM_OPEN_THRESH&&!palm.pinchConfirmed){palm.gestureType='open';}else if(palm.pinchConfirmed){palm.gestureType='pinch';}else if(palm.speed>CFG.PALM_SPEED_SWIPE){palm.gestureType='swipe';}else{palm.gestureType='open';}});
+    if(bothEff&&gestureReady){const palmL=S.palms[0],palmR=S.palms[1],bothPinch=palmL.pinchConfirmed&&palmR.pinchConfirmed,distChange=S.bothHandDist-S.prevBothHandDist;if(S.bothHandDist<CFG.PALM_BOTH_TOGETHER_DIST&&bothPinch){triggerBothHandsTogether();lastGestureTime=now;}else if(distChange<-CFG.PALM_BOTH_CLOSER_SPEED/CFG.CAM_FPS&&!S.fusionActive){triggerBothHandsCloser();lastGestureTime=now;}else if(distChange>CFG.PALM_BOTH_APART_SPEED/CFG.CAM_FPS&&S.fusionActive){triggerBothHandsApart();lastGestureTime=now;}}
+    if(anyEff&&gestureReady&&!bothEff){for(let i=0;i<2;i++){const palm=S.palms[i];if(!palm.effective)continue;const px=palm.x*CW,py=palm.y*CH;if(palm.gestureType==='pinch'&&palm.pinchConfirmed){triggerPinchGesture(px,py,i);lastGestureTime=now;}else if(palm.gestureType==='push'){triggerPushGesture(px,py,i);lastGestureTime=now;}else if(palm.gestureType==='swipe'&&palm.speed>5){triggerSwipeGesture(px,py,i);lastGestureTime=now;}}}
+    if(S.fusionActive){S.fusionTimer+=CFG.CAM_FPS/1000*0.016;if(S.fusionTimer>=CFG.FUSION_DURATION/1000){resetToNaturalBaseline();S.fusionActive=false;S.fusionTimer=0;showStatus('合十归元 · 阴阳复位 · 回归月相自然基线');}}
+    if(S.lockedPhase>=0){S.lockedPhaseTimer-=1/CFG.CAM_FPS;if(S.lockedPhaseTimer<=0){S.lockedPhase=-1;triggerMoonBhvTransition(-1);document.querySelectorAll('.moon-btn').forEach(b=>b.classList.remove('active'));showStatus('月相锁定解除 · 回归自然流动');}}
+    const palmEffAny=S.palms.some(p=>p.effective),palmEffBoth=S.palms.every(p=>p.effective),palmDetAny=S.palms.some(p=>p.detected);
+    if(palmEffBoth){palmEl.textContent=S.fusionActive?'双掌合一 · 归元':'双掌感应 · 阴阳共舞';palmEl.style.color='rgba(255,220,120,0.85)';palmEl.style.display='block';}
+    else if(S.palms[0].effective){palmEl.textContent=S.palms[0].gestureType==='pinch'?'左掌·气聚':S.palms[0].gestureType==='push'?'左掌·归元':'左掌·金气';palmEl.style.color='rgba(255,200,60,0.75)';palmEl.style.display='block';}
+    else if(S.palms[1].effective){palmEl.textContent=S.palms[1].gestureType==='pinch'?'右掌·气聚':S.palms[1].gestureType==='push'?'右掌·归元':'右掌·水气';palmEl.style.color='rgba(34,102,204,0.75)';palmEl.style.display='block';}
+    else if(palmDetAny){palmEl.textContent='手远 · 请靠近';palmEl.style.color='rgba(150,150,150,0.45)';palmEl.style.display='block';}
+    else{palmEl.style.display='none';}
+    const totalAreaRatio=(lCnt+rCnt)/totalPixels,ds=totalAreaRatio-S.prevSkin;
+    if(ds>0.005&&S.lockedPhase<0){S.yang=Math.min(CFG.Y_MAX,S.yang+0.8);S.yin=100-S.yang;}else if(ds<-0.005&&S.lockedPhase<0){S.yin=Math.min(CFG.Y_MAX,S.yin+0.8);S.yang=100-S.yin;}
+    S.prevSkin=totalAreaRatio;
+  },intv);
+}
+
+function triggerPinchGesture(px,py,handIdx){S.gesturePulses.push({x:px,y:py,r:0,maxR:CFG.GESTURE_PULSE_MAX_R,life:CFG.GESTURE_PULSE_LIFE,maxLife:CFG.GESTURE_PULSE_LIFE,type:handIdx===0?'yang':'yin'});const yr=S.yang/100;let bestIdx=0,bestDist=999;MOON_PHASES.forEach((mp,i)=>{const dist=Math.abs(mp.yang/100-yr);if(dist<bestDist){bestDist=dist;bestIdx=i;}});showMoonSuggestion(bestIdx);showStatus('捏合·月相感应：'+MOON_PHASES[bestIdx].name+' · '+MOON_PHASES[bestIdx].freq+'Hz');playGestureSound(MOON_PHASES[bestIdx].freq,0.3);
+  // ★ 抓取投掷：捏合后投出附近粒子
+  const palm=S.palms[handIdx];
+  for(const p of P){const dx=p.x-px,dy=p.y-py,dist=Math.sqrt(dx*dx+dy*dy);if(dist<CFG.HAND_GRAB_RADIUS&&dist>1){const throwF=CFG.HAND_THROW_MULT*(1-dist/CFG.HAND_GRAB_RADIUS);p.vx+=palm.vx*CFG.CAM_W*throwF;p.vy+=palm.vy*CFG.CAM_H*throwF;}}
+  // ★ 捏合爆发粒子特效
+  for(let i=0;i<8;i++){const a=Math.PI*2*i/8,sp=2+Math.random()*2;if(S.handTrails.length<CFG.HAND_TRAIL_MAX){S.handTrails.push({x:px,y:py,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:15,maxLife:15,size:2+Math.random()*2,r:handIdx===0?255:80,g:handIdx===0?220:160,b:handIdx===0?100:255});}}
+}
+function triggerPushGesture(px,py,handIdx){S.gesturePulses.push({x:px,y:py,r:0,maxR:CFG.GESTURE_PULSE_MAX_R*1.3,life:CFG.GESTURE_PULSE_LIFE*1.2,maxLife:CFG.GESTURE_PULSE_LIFE*1.2,type:'push'});const isYangHand=handIdx===0;for(const p of P){if(isYangHand&&p.type!=='yang')continue;if(!isYangHand&&p.type!=='yin')continue;const dx=p.x-px,dy=p.y-py,dist=Math.sqrt(dx*dx+dy*dy)||1,f=CFG.PUSH_RESET_FORCE/dist;p.vx+=dx*f;p.vy+=dy*f;}if(S.lockedPhase<0){const naturalPhase=getNaturalMoonPhase();if(isYangHand)S.yang+=(naturalPhase.yang-S.yang)*0.3;else S.yin+=(naturalPhase.yin-S.yin)*0.3;S.yang=Math.max(CFG.Y_MIN,Math.min(CFG.Y_MAX,S.yang));S.yin=100-S.yang;}showStatus(handIdx===0?'左掌推·金气归元':'右掌推·水气归元');playGestureSound(isYangHand?528:174,0.4);
+  // ★ 推掌冲击波：额外排斥脉冲
+  S.handRepelPulse.push({x:px,y:py,r:0,maxR:CFG.HAND_REPEL_PULSE_R,life:CFG.HAND_REPEL_PULSE_LIFE,maxLife:CFG.HAND_REPEL_PULSE_LIFE,handIdx:handIdx});
+  // ★ 推掌能量爆发粒子
+  for(let i=0;i<12;i++){const a=Math.PI*2*i/12+Math.random()*0.3,sp=3+Math.random()*3;if(S.handTrails.length<CFG.HAND_TRAIL_MAX){S.handTrails.push({x:px,y:py,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:20,maxLife:20,size:2.5+Math.random()*2,r:handIdx===0?255:100,g:handIdx===0?240:180,b:handIdx===0?150:255});}}
+}
+function triggerSwipeGesture(px,py,handIdx){S.gesturePulses.push({x:px,y:py,r:0,maxR:CFG.GESTURE_PULSE_MAX_R*0.8,life:CFG.GESTURE_PULSE_LIFE*0.6,maxLife:CFG.GESTURE_PULSE_LIFE*0.6,type:'swipe'});playGestureSound(handIdx===0?396:285,0.2);
+  // ★ 滑动能量线：沿运动方向喷射粒子
+  const palm=S.palms[handIdx];
+  const angle=Math.atan2(palm.vy,palm.vx);
+  for(let i=0;i<15;i++){const a=angle+(Math.random()-0.5)*0.8,sp=4+Math.random()*5;if(S.handTrails.length<CFG.HAND_TRAIL_MAX){S.handTrails.push({x:px,y:py,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:18+Math.random()*10,maxLife:28,size:1.5+Math.random()*2,r:handIdx===0?255:80,g:handIdx===0?210:140,b:handIdx===0?80:255});}}
+  // ★ 滑动推力：方向性力场
+  for(const p of P){const dx=p.x-px,dy=p.y-py,dist=Math.sqrt(dx*dx+dy*dy);if(dist<200&&dist>1){const f=1.5*(1-dist/200)/dist;p.vx+=dx*f*1.5+Math.cos(angle)*0.8;p.vy+=dy*f*1.5+Math.sin(angle)*0.8;}}
+}
+function triggerBothHandsCloser(){showStatus('双掌相向 · 阴阳交汇 · 形成漩涡');const midX=(S.palms[0].x+S.palms[1].x)/2*CW,midY=(S.palms[0].y+S.palms[1].y)/2*CH;S.gesturePulses.push({x:midX,y:midY,r:0,maxR:CFG.GESTURE_PULSE_MAX_R,life:CFG.GESTURE_PULSE_LIFE,maxLife:CFG.GESTURE_PULSE_LIFE,type:'fusion'});playGestureChord(432,528,0.3);}
+function triggerBothHandsApart(){S.fusionActive=false;S.fusionTimer=0;showStatus('双掌远离 · 阴阳分离');playGestureSound(285,0.3);}
+function triggerBothHandsTogether(){if(S.fusionActive)return;S.fusionActive=true;S.fusionTimer=0;const midX=(S.palms[0].x+S.palms[1].x)/2*CW,midY=(S.palms[0].y+S.palms[1].y)/2*CH;S.gesturePulses.push({x:midX,y:midY,r:0,maxR:CFG.GESTURE_PULSE_MAX_R*1.5,life:CFG.GESTURE_PULSE_LIFE*1.5,maxLife:CFG.GESTURE_PULSE_LIFE*1.5,type:'together'});showStatus('双掌合十 · 阴阳归一 · 3秒后归元');flashScreen('rgba(255,215,72,0.55)');playGestureChord(432,528,0.5);}
+function resetToNaturalBaseline(){const naturalPhase=getNaturalMoonPhase();S.yang=naturalPhase.yang;S.yin=naturalPhase.yin;S.lockedPhase=-1;triggerMoonBhvTransition(-1);document.querySelectorAll('.moon-btn').forEach(b=>b.classList.remove('active'));for(const p of P){p.vx+=(Math.random()-0.5)*8;p.vy+=(Math.random()-0.5)*8;}flashScreen('rgba(255,255,200,0.5)');}
+function getNaturalMoonPhase(){const now=new Date(),knownNewMoon=new Date(2026,5,3).getTime(),daysSince=(now.getTime()-knownNewMoon)/(1000*60*60*24),phaseFrac=((daysSince%29.53)/29.53+1)%1,phaseIdx=Math.round(phaseFrac*7)%8;return MOON_PHASES[phaseIdx];}
+
+function playGestureSound(freq,duration){if(!S.ac||!S.audioOn)return;const t=S.ac.currentTime,osc=S.ac.createOscillator(),gain=S.ac.createGain();osc.type='sine';osc.frequency.setValueAtTime(freq,t);gain.gain.setValueAtTime(0.15,t);gain.gain.exponentialRampToValueAtTime(0.001,t+duration);osc.connect(gain);if(S.panner)gain.connect(S.panner);else gain.connect(S.ac.destination);osc.start(t);osc.stop(t+duration);}
+function playGestureChord(f1,f2,duration){if(!S.ac||!S.audioOn)return;const t=S.ac.currentTime;[f1,f2].forEach(freq=>{const osc=S.ac.createOscillator(),gain=S.ac.createGain();osc.type='sine';osc.frequency.setValueAtTime(freq,t);gain.gain.setValueAtTime(0.1,t);gain.gain.exponentialRampToValueAtTime(0.001,t+duration);osc.connect(gain);if(S.panner)gain.connect(S.panner);else gain.connect(S.ac.destination);osc.start(t);osc.stop(t+duration);});}
+
+canvas.addEventListener('mousemove',e=>{const dx=e.clientX-S.mx,dy=e.clientY-S.my;S.mvx=dx;S.mvy=dy;S.mspeed=Math.sqrt(dx*dx+dy*dy);S.mx=e.clientX;S.my=e.clientY;if(S.lockedPhase<0){const cx2=CW/2,cy2=CH/2,dist=Math.hypot(S.mx-cx2,S.my-cy2),dR=dist/Math.hypot(cx2,cy2),sp=Math.min(S.mspeed/28,1);if(sp>0.28||dR<0.22){S.yang=Math.min(CFG.Y_MAX,S.yang+0.14*(1-dR));S.yin=100-S.yang;}else if(S.mspeed<2&&dR>0.58){S.yin=Math.min(CFG.Y_MAX,S.yin+0.05);S.yang=100-S.yin;}}});
+canvas.addEventListener('click',e=>{S.clickPulses.push({x:e.clientX,y:e.clientY,r:0,maxR:CFG.CLICK_PULSE_MAX_R,life:CFG.CLICK_PULSE_LIFE,maxLife:CFG.CLICK_PULSE_LIFE,type:e.clientX>CW/2?'yang':'yin'});});
+
+setInterval(()=>{const edge=S.mx<28||S.mx>CW-28||S.my<28||S.my>CH-28;if(edge&&S.mspeed<2.5){S.edgeTimer=(S.edgeTimer||0)+0.5;if(S.edgeTimer>=5&&S.yang>70){triggerDusk();S.edgeTimer=0;}}else S.edgeTimer=0;},500);
+setInterval(()=>{const balanced=S.yang>=CFG.BALANCE_LO&&S.yang<=CFG.BALANCE_HI;if(balanced){S.balSec++;if(S.balSec>=CFG.HARMONY_TIME&&!S.harmonyActive){S.harmonyActive=true;S.yang=50;S.yin=50;showStatus('阴阳和合 · 天人合一 · 金光璀璨 · 五度和声');setTimeout(()=>{S.harmonyActive=false;},CFG.HARMONY_DURATION);}}else S.balSec=0;},1000);
+setInterval(()=>{if(S.lockedPhase>=0)return;const naturalPhase=getNaturalMoonPhase(),targetYang=naturalPhase.yang;S.yang+=(targetYang-S.yang)*CFG.NATURAL_DRIFT;S.yin=100-S.yang;S.yang=Math.max(CFG.NATURAL_DRIFT_MIN,Math.min(CFG.NATURAL_DRIFT_MAX,S.yang));S.yin=100-S.yang;},100);
+
+// ═══════════════════════════════════════════════════════════════
+// ★ 主渲染循环（增加后处理）
+// ═══════════════════════════════════════════════════════════════
+function render(){
+  S.time+=S.dt;
+  spawnTideSplash();updateTideSplash();updateParticles();updateMouseEffects();updateAudio();
+  ctx.clearRect(0,0,CW,CH);
+  drawSkyGradient();
+  drawBg();
+  drawClouds();
+  drawTide();
+  drawTideSplash();
+  drawHarmony();
+  drawPalmField();
+  drawClickPulses();
+  drawMouseGlow();
+  drawTaiji(CW/2,CH/2,68);
+  drawParticles();
+  drawTrailParticles();
+  drawHandTrails();
+  drawCursorTrail();
+  drawMeter();
+  // ★ 后处理特效
+  drawVignette();
+  drawBloom();
+
+  requestAnimationFrame(render);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+// ★ 月相首页导航系统 v2
+// ═══════════════════════════════════════════════════════════════
+const homePage = document.getElementById('home-page');
+const btnHome = document.getElementById('btn-home');
+const homeBgCanvas = document.getElementById('home-bg-canvas');
+const homeBgCtx = homeBgCanvas ? homeBgCanvas.getContext('2d') : null;
+let isHomePage = true;
+let homeStars = [];
+let homeAnimFrameId = null;
+
+function initHomeStars(){
+  const w=homeBgCanvas.width, h=homeBgCanvas.height;
+  homeStars=[];
+  const count=Math.floor((w*h)/2500);
+  for(let i=0;i<count;i++){
+    homeStars.push({
+      x:Math.random()*w, y:Math.random()*h,
+      r:Math.random()*2.0+0.15,
+      brightness:Math.random()*0.5+0.5,
+      twSpeed:Math.random()*2.0+0.18,
+      tw:Math.random()*Math.PI*2,
+      hasGlow:Math.random()<0.32,
+      warm:Math.random()<0.40
+    });
+  }
+}
+
+function drawHomeBg(){
+  if(!homeBgCtx) return;
+  const cw=homeBgCanvas.width, ch=homeBgCanvas.height;
+  homeBgCtx.clearRect(0,0,cw,ch);
+  const gr=homeBgCtx.createRadialGradient(cw/2,ch*0.38,ch*0.04,cw/2,ch*0.38,ch*0.95);
+  gr.addColorStop(0,'rgb(50,30,68)');
+  gr.addColorStop(0.4,'rgb(20,12,45)');
+  gr.addColorStop(0.75,'rgb(7,4,20)');
+  gr.addColorStop(1,'rgb(2,1,6)');
+  homeBgCtx.fillStyle=gr;
+  homeBgCtx.fillRect(0,0,cw,ch);
+  const t=S.time||0;
+  for(const s of homeStars){
+    const flicker=Math.sin(t*s.twSpeed+s.tw)*0.5+0.5;
+    const a=flicker*s.brightness;
+    const r=s.warm?255:200, g=s.warm?245:220, b=s.warm?220:255;
+    homeBgCtx.beginPath();
+    homeBgCtx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    homeBgCtx.fillStyle=`rgba(${r},${g},${b},${a.toFixed(3)})`;
+    homeBgCtx.fill();
+    if(s.hasGlow&&flicker>0.45){
+      const glowA=((flicker-0.45)/0.55)*a*0.4;
+      const glowR=s.r*(4+flicker*4);
+      const gg=homeBgCtx.createRadialGradient(s.x,s.y,0,s.x,s.y,glowR);
+      gg.addColorStop(0,`rgba(${r},${g},${b},${glowA.toFixed(3)})`);
+      gg.addColorStop(1,`rgba(${r},${g},${b},0)`);
+      homeBgCtx.beginPath();
+      homeBgCtx.arc(s.x,s.y,glowR,0,Math.PI*2);
+      homeBgCtx.fillStyle=gg;
+      homeBgCtx.fill();
+    }
+  }
+}
+
+function homeBgLoop(){
+  if(!isHomePage) return;
+  drawHomeBg();
+  homeAnimFrameId=requestAnimationFrame(homeBgLoop);
+}
+
+function playCardEntranceAnimation(){
+  var cards=document.querySelectorAll('.moon-card');
+  cards.forEach(function(card,i){
+    setTimeout(function(){
+      card.classList.add('show');
+      // 入场动画结束后固定为可见状态
+      setTimeout(function(){
+        card.classList.remove('show');
+        card.classList.add('visible');
+      }, 950);
+    }, i*200);
+  });
+}
+
+function resetCardAnimations(){
+  document.querySelectorAll('.moon-card').forEach(function(card){
+    card.classList.remove('show','idle','visible');
+    card.style.opacity='0';
+    card.style.transform='translateY(40px) scale(0.7)';
+    card.style.animationDelay='';
+  });
+}
+
+function resizeHomeBg(){
+  if(!homeBgCanvas) return;
+  homeBgCanvas.width = window.innerWidth;
+  homeBgCanvas.height = window.innerHeight;
+  initHomeStars();
+}
+window.addEventListener('resize', function(){
+  if(isHomePage){ resizeHomeBg(); }
+});
+
+function showHomePage(){
+  isHomePage = true;
+  homePage.classList.remove('hidden');
+  btnHome.style.display='none';
+  document.body.style.cursor='default';
+  cursorEl.style.display='none';
+  document.getElementById('title').style.opacity='0';
+  document.getElementById('subtitle').style.opacity='0';
+  document.getElementById('moon-panel').style.opacity='0';
+  document.getElementById('ctrl-panel').style.opacity='0';
+  resizeHomeBg();homeBgLoop();
+  resetCardAnimations();
+  setTimeout(playCardEntranceAnimation,200);
+}
+
+function hideHomePage(phaseIdx){
+  isHomePage = false;
+  homePage.classList.add('hidden');
+  btnHome.style.display='';
+  document.body.style.cursor='none';
+  cursorEl.style.display='';
+  document.getElementById('title').style.opacity='1';
+  document.getElementById('subtitle').style.opacity='1';
+  document.getElementById('moon-panel').style.opacity='1';
+  document.getElementById('ctrl-panel').style.opacity='1';
+  if(homeAnimFrameId){cancelAnimationFrame(homeAnimFrameId);homeAnimFrameId=null;}
+  if(typeof phaseIdx==='number'&&phaseIdx>=0&&phaseIdx<=7){lockMoonPhase(phaseIdx);}
+}
+
+document.querySelectorAll('.moon-card').forEach(function(card){
+  card.addEventListener('click',function(){hideHomePage(parseInt(card.dataset.phase));});
+});
+
+btnHome.addEventListener('click',function(){
+  showHomePage();
+  if(S.lockedPhase>=0){S.lockedPhase=-1;triggerMoonBhvTransition(-1);document.querySelectorAll('.moon-btn').forEach(function(b){b.classList.remove('active');});}
+  showStatus('\u8fd4\u56de\u521d\u59cb\u754c\u9762 \u00b7 \u6708\u76f5\u516b\u9636\u5f85\u9009');
+});
+
+showHomePage();
+
+render();
+</script>
+</body>
+</html>
