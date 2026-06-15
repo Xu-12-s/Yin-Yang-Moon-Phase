@@ -18,3 +18,6 @@ fix_v5.py
 fix_v6.py
 patch_v2.py
 revert_v4.py
+
+# Local backup of the original Chinese-named HTML (kept on disk only)
+行气灵眸(5).html.bak
