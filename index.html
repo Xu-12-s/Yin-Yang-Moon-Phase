@@ -36,15 +36,15 @@ body{background:#000;overflow:hidden;font-family:'宋体','SimSun',serif;user-se
 .ctrl-btn{padding:5px 13px;border:1px solid rgba(200,180,120,0.32);background:rgba(0,0,0,0.52);color:rgba(255,240,180,0.75);font-family:'宋体','SimSun',serif;font-size:12px;cursor:pointer;border-radius:3px;transition:all 0.25s}
 .ctrl-btn:hover{border-color:rgba(255,220,100,0.65);color:#fff}
 .ctrl-btn.on{background:rgba(255,180,50,0.16);border-color:rgba(255,200,80,0.75);color:#fff;box-shadow:0 0 10px rgba(255,180,50,0.32)}
-#status-msg{position:absolute;top:78px;left:50%;transform:translateX(-50%);color:rgba(255,240,180,0.68);font-size:12px;letter-spacing:3px;pointer-events:none;text-align:center;transition:opacity 0.8s;text-shadow:0 0 10px rgba(255,200,80,0.38);white-space:nowrap}
+#status-msg{position:absolute;top:235px;left:50%;transform:translateX(-50%);color:rgba(255,240,180,0.68);font-size:12px;letter-spacing:3px;pointer-events:none;text-align:center;transition:opacity 0.8s;text-shadow:0 0 10px rgba(255,200,80,0.38);white-space:nowrap}
 #balance-label{position:absolute;bottom:188px;right:18px;color:rgba(200,200,200,0.42);font-size:10px;text-align:center;width:96px;pointer-events:none;letter-spacing:1px}
 #balance-time{position:absolute;bottom:172px;right:18px;color:rgba(180,220,255,0.48);font-size:10px;text-align:center;width:96px;pointer-events:none}
-#cam-preview{position:absolute;bottom:148px;right:18px;width:210px;height:158px;border:1px solid rgba(150,180,255,0.22);border-radius:3px;overflow:hidden;display:none}
+#cam-preview{position:absolute;top:50px;left:18px;width:260px;height:168px;border:1px solid rgba(200,180,120,0.42);border-radius:12px;overflow:hidden;display:none;background:rgba(8,12,32,0.93);backdrop-filter:blur(14px);box-shadow:0 0 30px rgba(180,140,60,0.18);z-index:20}
 #cam-video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
 #event-flash{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;opacity:0;transition:opacity 0.15s}
 #guide{position:absolute;bottom:66px;right:18px;color:rgba(180,160,120,0.35);font-size:9px;text-align:right;pointer-events:none;line-height:1.8;letter-spacing:1px}
-#palm-indicator{position:absolute;top:110px;left:50%;transform:translateX(-50%);color:rgba(100,200,255,0.55);font-size:10px;letter-spacing:2px;pointer-events:none;text-align:center;display:none}
-#ui-guide-text{position:absolute;top:138px;left:50%;transform:translateX(-50%);color:rgba(200,215,255,0.42);font-size:15px;letter-spacing:4px;pointer-events:none;text-align:center;line-height:2.2;white-space:nowrap;font-family:'宋体','SimSun',serif;text-shadow:0 0 12px rgba(100,160,255,0.18)}
+#palm-indicator{position:absolute;top:262px;left:50%;transform:translateX(-50%);color:rgba(100,200,255,0.55);font-size:10px;letter-spacing:2px;pointer-events:none;text-align:center;display:none}
+#ui-guide-text{position:absolute;top:285px;left:50%;transform:translateX(-50%);color:rgba(200,215,255,0.42);font-size:15px;letter-spacing:4px;pointer-events:none;text-align:center;line-height:1.5;white-space:nowrap;font-family:'宋体','SimSun',serif;text-shadow:0 0 12px rgba(100,160,255,0.18)}
 #cursor-custom{position:fixed;width:18px;height:18px;border:1px solid rgba(255,220,100,0.65);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width 0.2s,height 0.2s}
 /* ═══ 月相选择首页 v2 ═══ */
 #home-page{position:fixed;top:0;left:0;width:100%;height:100%;z-index:5000;display:flex;flex-direction:row;align-items:center;justify-content:center;transition:opacity 0.8s ease,visibility 0.8s;overflow:hidden}
@@ -94,7 +94,7 @@ body{background:#000;overflow:hidden;font-family:'宋体','SimSun',serif;user-se
   </div>
   <div id="status-msg">以意领气 · 月相轮转 · 掌心即乾坤</div>
   <div id="palm-indicator">手掌已感应</div>
-  <div id="ui-guide-text">点击灵眸，以手驭粒<br>点击音境，以声观月<br>点击归初，返本归元</div>
+  <div id="ui-guide-text">点击灵眸，以手驭粒；点击音境，以声观月；点击归初，返本归元</div>
   <div id="balance-label">阴阳平衡</div>
   <canvas id="balance-meter" width="96" height="96"></canvas>
   <div id="balance-time"></div>
