@@ -801,16 +801,16 @@ function drawTaiji(cx,cy,r){
   ctx.fillStyle=ig;ctx.fill();
   ctx.shadowBlur=0;
   ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.strokeStyle=`rgba(200,175,95,${0.28+yr*0.28})`;ctx.lineWidth=1.2;ctx.stroke();
-  // ★ 鱼眼：发光小圆
+  // ★ 鱼眼：发光小圆（固定颜色，不随阴阳状态变化）
   ctx.shadowColor='rgba(60,100,200,0.6)';ctx.shadowBlur=10;
   ctx.beginPath();ctx.arc(0,-r/2,r*0.11,0,Math.PI*2);
   const eyeG1=ctx.createRadialGradient(0,-r/2,0,0,-r/2,r*0.11);
-  eyeG1.addColorStop(0,`rgba(100,140,220,${iB*0.9})`);eyeG1.addColorStop(1,`rgba(26,42,74,${iB*0.7})`);
+  eyeG1.addColorStop(0,'rgba(100,140,220,0.9)');eyeG1.addColorStop(1,'rgba(26,42,74,0.7)');
   ctx.fillStyle=eyeG1;ctx.fill();
   ctx.shadowColor='rgba(255,230,160,0.6)';ctx.shadowBlur=10;
   ctx.beginPath();ctx.arc(0,r/2,r*0.11,0,Math.PI*2);
   const eyeG2=ctx.createRadialGradient(0,r/2,0,0,r/2,r*0.11);
-  eyeG2.addColorStop(0,`rgba(255,245,200,${yB*0.9})`);eyeG2.addColorStop(1,`rgba(245,240,224,${yB*0.7})`);
+  eyeG2.addColorStop(0,'rgba(255,245,200,0.9)');eyeG2.addColorStop(1,'rgba(245,240,224,0.7)');
   ctx.fillStyle=eyeG2;ctx.fill();
   ctx.restore();
 }
